@@ -22,8 +22,7 @@ const GestorEstudio = () => {
   console.log('🔑 Auth Token en GestorEstudio:', authToken);
   console.log('👤 UserId en GestorEstudio:', userId);
   
-  // IMPORTANTE: Verifica si VITE_API_URL ya incluye '/api' o no
-  // Si tu server.js usa app.use('/sesiones', ...) entonces NO agregues '/api'
+
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   
   // Configuración de headers con token
