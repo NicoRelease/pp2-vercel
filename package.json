@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "@vercel/node": "^5.5.15"
+  },
+  "scripts": {  
+    "dev:frontend": "npm run dev --prefix FrontEnd", 
+    "dev": "npm run dev:frontend"
   }
 }

@@ -94,14 +94,14 @@ const TareaManager = () => {
     cargarDatos();
   }, [tareaId, state]);
 
-  // ⛔ FIX: Inicializar el tiempo **solo** cuando llega la tarea
+  
   React.useEffect(() => {
     if (tarea && tarea.tiempo_real_ejecucion !== undefined) {
       setTiempoTranscurrido(tarea.tiempo_real_ejecucion || 0);
     }
   }, [tarea]);
 
-  // ⛔ FIX PRINCIPAL: El temporizador YA NO toca tarea.tiempo_real_ejecucion
+  
   React.useEffect(() => {
     if (estaActiva && !intervalId) {
       const id = setInterval(() => {
@@ -155,7 +155,7 @@ const TareaManager = () => {
         setTiempoTranscurrido(0);
       }
 
-      //alert(`Tarea ${accion} exitosamente`);
+
 
     } catch (err) {
       alert('Error al gestionar tarea: ' + (err.response?.data?.message || err.message));
@@ -266,7 +266,7 @@ const TareaManager = () => {
           </div>
         )}
 
-        {/* ⏰ TEMPORIZADOR FIX: ahora muestra tiempoTranscurrido */}
+        {/*muestra tiempoTranscurrido */}
         {tarea && !tarea.es_completada && (
           <div style={{
             backgroundColor: 'white',

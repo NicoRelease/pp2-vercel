@@ -1,32 +1,38 @@
-// vite.config.js (CORRECCIÓN FINAL)
 
 import { defineConfig, loadEnv } from 'vite' 
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'path';
 
 export default defineConfig(({ mode }) => {
     
     // Carga las variables de entorno para usar API_URL
-    const env = loadEnv(mode, process.cwd(), '');
-    const API_TARGET = env.VITE_API_TARGET_LOCAL; // 🔑 USAR UNA NUEVA VARIABLE
+    const rootPath = path.resolve(process.cwd(), '..'); 
+    const env = loadEnv(mode, rootPath, '');
+    const API_TARGET = env.VITE_API_TARGET_LOCAL || 'http://localhost:3000';
 
     // Asumimos que tu backend de Node.js corre en http://localhost:3000
     // Si tu .env tiene VITE_API_URL=/api, NO uses esa aquí como target.
-
+    const envVariables = {
+        // Debemos inyectar la clave secreta con el prefijo VITE_
+        // y asegurarnos de que el valor es una cadena (JSON.stringify)
+        'import.meta.env.VITE_CLIENT_SECRET_KEY': JSON.stringify(env.CLIENT_SECRET_KEY), 
+        
+        // Inyectamos la URL de la API también para mayor seguridad, aunque el proxy ya funciona.
+        'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || '/backend'),
+    };
     console.log(`[Vite Config] API Proxy Target: ${API_TARGET}`); 
 
     return {
         plugins: [react(), tailwindcss()],
+        define: envVariables,
         server: {
             proxy: {
-                // 🔑 CLAVE: Captura todas las peticiones que empiezan por /api
-                '/api': {
-                    // 🔑 Objetivo de tu servidor Node/Express local
+                
+                '/backend': {   
                     target: API_TARGET, 
                     changeOrigin: true,
-                    // Si tu backend (server.js) maneja las rutas como /login (sin /api),
-                    // descomenta la siguiente línea:
-                    // rewrite: (path) => path.replace(/^\/api/, ''), 
+                   
                 }
             }
         }
