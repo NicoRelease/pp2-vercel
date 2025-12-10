@@ -1,0 +1,36 @@
+# ------------------------------------
+# 1. Dependencias y Caché de Node.js
+# ------------------------------------
+/node_modules
+/dist
+/build
+npm-debug.log*
+
+# ------------------------------------
+# 2. Variables de Entorno y Secretos
+# ------------------------------------
+# ¡CRÍTICO! Nunca subir la base de datos ni las claves
+.env
+.env.local
+.env.development
+.env.production
+.env.*
+
+# ------------------------------------
+# 3. Datos de Desarrollo y Testing
+# ------------------------------------
+# Archivos de depuración y logs
+*.log
+
+# Cobertura de tests de Jest
+/coverage
+
+# Base de datos local (si usaras SQLite)
+*.sqlite
+/data/*.sqlite 
+
+# ------------------------------------
+# 4. Entornos de Desarrollo Específicos
+# ------------------------------------
+.vscode/
+.idea/
