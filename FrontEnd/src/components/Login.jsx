@@ -2,21 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../App.css';
 import HeaderNoLink from './HeaderNoLink';
-import HeaderInicio from './HeaderInicio';
+import CryptoJS from 'crypto-js';
 
-// NOTA IMPORTANTE: La librería 'crypto-js' no se puede importar directamente en este entorno.
-// Usaremos la referencia global si existe, o un método de codificación simple (Base64)
-// si no existe, para asegurar que el componente compile. 
-// Para encriptación AES real, el usuario debe cargar crypto-js mediante un script CDN en el HTML principal.
 
-// Componente Header básico implementado internamente
-const Header = () => (
-  <header className="bg-blue-600 text-white py-4 shadow-md mb-8">
-    <div className="container mx-auto px-4 text-center">
-      <h1 className="text-2xl font-bold">🧠 App de gestión de estudio personalizado</h1>
-    </div>
-  </header>
-);
 
 export default function Login() {
   const navigate = useNavigate();
@@ -26,19 +14,22 @@ export default function Login() {
   const [loginPassword, setLoginPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(""); // Estado para mensajes de error
-
-  const secretKey = 'clave-secreta-255bits';
+  
+const SECRET_KEY= import.meta.env.VITE_CLIENT_SECRET_KEY;
   
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 
   // Función de Encriptación / Codificación
   const encrypt = (text) => {
+    console.log("🔐 Encriptando texto:", text);
+    console.log(`El secret key es: ${SECRET_KEY}`);
     // Comprobamos si la librería CryptoJS está disponible globalmente
     // Si no está (lo más probable en este entorno), usamos Base64 (NO SEGURO).
     // ⚠️ Advertencia: Si el backend espera AES, el login fallará.
+    console.log("CryptoJS disponible:", typeof CryptoJS !== 'undefined' && CryptoJS.AES);
     if (typeof CryptoJS !== 'undefined' && CryptoJS.AES) {
-        return CryptoJS.AES.encrypt(text, secretKey).toString(); 
+        return CryptoJS.AES.encrypt(text, SECRET_KEY).toString(); 
     }
     
     console.error("❌ Encriptación AES no disponible. Usando Base64 (¡NO SEGURO!).");
@@ -77,11 +68,12 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
     setIsLoading(true);
 
     // La codificación/encriptación se realiza aquí, justo antes del fetch
-console.log('Datos del formulario: ', loginUser, loginPassword);
+
     const encryptedUser = encrypt(loginUser);
     const encryptedPassword = encrypt(loginPassword);
-
+console.log("se encriptan los datos")
     try {
+    console.log("comienza el Login desde el front")
       // 💡 Nota: Se recomienda usar rutas relativas o un proxy para evitar problemas de CORS
       const response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
@@ -93,7 +85,7 @@ console.log('Datos del formulario: ', loginUser, loginPassword);
       });
 
       const data = await response.json();
-       
+       console.log("Datos recibidos del servidor:", data);
       if (response.ok && data.token) {
         // Llamada a la función de manejo de éxito, que ahora guarda el token
         handleLogin({ token: data.token, user: loginUser });

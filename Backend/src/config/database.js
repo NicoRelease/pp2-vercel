@@ -8,7 +8,7 @@ dotenv.config();
 
 
 // 1. CONFIGURACIÓN E INSTANCIACIÓN
-const SYNC_ENABLED = true; // Mantener para el desarrollo
+const SYNC_ENABLED = false; // Mantener para el desarrollo
 
 // 🔑 CLAVE: Usamos la URL completa de Supabase
 const sequelize = new Sequelize(process.env.DATABASE_URL, { 

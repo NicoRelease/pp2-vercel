@@ -1,5 +1,6 @@
 // /src/controllers/auth.controller.js
 
+import { TIME } from 'sequelize';
 import * as authService from '../services/auth.service.js';
 import CryptoJS from 'crypto-js';
 
@@ -10,8 +11,7 @@ const CLIENT_SECRET_KEY = process.env.CLIENT_SECRET_KEY || 'clave-secreta-255bit
 // =======================================================
 const decryptTransport = (encryptedText) => {
     try {
-        console.log('🔐 Intentando desencriptar:', encryptedText?.substring(0, 50) + '...');
-        console.log('🔑 Clave usada:', CLIENT_SECRET_KEY);
+        
         
         // Desencriptar usando AES
         const bytes = CryptoJS.AES.decrypt(encryptedText, CLIENT_SECRET_KEY);
@@ -19,8 +19,7 @@ const decryptTransport = (encryptedText) => {
         // Convertir a string UTF-8
         const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
         
-        console.log('✅ Texto desencriptado:', decryptedText);
-        
+             
         if (!decryptedText) {
             console.log('❌ La desencriptación devolvió string vacío');
             return '';
@@ -42,16 +41,11 @@ export const login = async (req, res) => {
     
     // Debug logs
     console.log('📥 LOGIN - Datos recibidos:');
-    console.log('encryptedUser:', encryptedUser?.substring(0, 50) + '...');
-    console.log('encryptedPassword:', encryptedPassword?.substring(0, 50) + '...');
     
     const userIdentifier = decryptTransport(encryptedUser); 
     const password = decryptTransport(encryptedPassword);
 
-    console.log('🔓 LOGIN - Desencriptado:');
-    console.log('userIdentifier:', userIdentifier);
-    console.log('password:', password ? '[PASSWORD_SET]' : '[EMPTY]');
-
+    
     if (!userIdentifier || !password) {
         return res.status(400).json({ error: "Datos de credenciales incompletos o inválidos." });
     }
@@ -79,17 +73,10 @@ export const register = async (req, res) => {
     const { username, encryptedEmail, encryptedPassword } = req.body;
 
     // Debug logs
-    console.log('📥 REGISTER - Datos recibidos:');
-    console.log('username:', username);
-    console.log('encryptedEmail:', encryptedEmail?.substring(0, 50) + '...');
-    console.log('encryptedPassword:', encryptedPassword?.substring(0, 50) + '...');
-    
+        
     const email = decryptTransport(encryptedEmail); 
     const password = decryptTransport(encryptedPassword);
 
-    console.log('🔓 REGISTER - Desencriptado:');
-    console.log('email:', email);
-    console.log('password:', password ? '[PASSWORD_SET]' : '[EMPTY]');
 
     if (!username || !email || !password) {
         console.log('❌ Validación fallida - Campos vacíos:');

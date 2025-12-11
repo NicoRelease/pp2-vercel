@@ -22,3 +22,4 @@ yarn-error.log*
 .vercel/
 dist
 build
+.env*.local

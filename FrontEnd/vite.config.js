@@ -11,14 +11,14 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, rootPath, '');
     const API_TARGET = env.VITE_API_TARGET_LOCAL || 'http://localhost:3000';
 
-    // Asumimos que tu backend de Node.js corre en http://localhost:3000
-    // Si tu .env tiene VITE_API_URL=/api, NO uses esa aquí como target.
+    
+    
     const envVariables = {
-        // Debemos inyectar la clave secreta con el prefijo VITE_
-        // y asegurarnos de que el valor es una cadena (JSON.stringify)
-        'import.meta.env.VITE_CLIENT_SECRET_KEY': JSON.stringify(env.CLIENT_SECRET_KEY), 
+    
         
-        // Inyectamos la URL de la API también para mayor seguridad, aunque el proxy ya funciona.
+        'import.meta.env.VITE_CLIENT_SECRET_KEY': JSON.stringify(env.VITE_CLIENT_SECRET_KEY), 
+        
+        
         'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || '/backend'),
     };
     console.log(`[Vite Config] API Proxy Target: ${API_TARGET}`); 
@@ -32,7 +32,14 @@ export default defineConfig(({ mode }) => {
                 '/backend': {   
                     target: API_TARGET, 
                     changeOrigin: true,
-                   
+                   configure: (proxy, options) => {
+                // Este listener se dispara cuando la conexión al backend es exitosa
+                proxy.on('proxyReq', (proxyReq, req, res) => {
+                    if (req.url.startsWith('/backend')) {
+                        console.log(`[PROXY-OK] 📞 Redirigiendo ${req.method} ${req.url} a ${options.target}`);
+                    }
+                });
+            }
                 }
             }
         }

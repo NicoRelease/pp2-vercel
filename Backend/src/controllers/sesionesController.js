@@ -221,9 +221,7 @@ export const eliminarSesionCompleta = async (req, res) => {
     const t = await sequelize.transaction();
 
     try {
-        // Asumiendo que has configurado la asociación con ON DELETE CASCADE, esto podría ser suficiente,
-        // pero es más seguro eliminar explícitamente si no estás seguro de la configuración de la DB.
-        await Tarea.destroy({
+            await Tarea.destroy({
             where: { sesion_id: id },
             transaction: t
         });

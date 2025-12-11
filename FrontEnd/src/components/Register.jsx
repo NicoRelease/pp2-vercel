@@ -40,7 +40,7 @@ export default function Register() {
 
         setLoading(true);
         setError('');
-console.log('Iniciando registro con:', { username, email, password });
+
 
     const encryptedEmail = encrypt(email);
     const encryptedPassword = encrypt(password);

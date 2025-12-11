@@ -4,9 +4,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || 10, 10);
-console.log('Valor de la variable de ambiente BCRYPT_SALT_ROUNDS:', process.env.BCRYPT_SALT_ROUNDS);
-console.log('BCRYPT_SALT_ROUNDS en User model:', BCRYPT_SALT_ROUNDS);
+const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || 8, 8);
+
 
 export default (sequelize) => {
     const User = sequelize.define('User', {

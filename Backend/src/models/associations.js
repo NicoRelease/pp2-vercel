@@ -5,8 +5,7 @@
  * * @param {object} models - Objeto que contiene todos los modelos de Sequelize (db.models)
  */
 function defineAssociations(models) {
-    // Desestructuramos los modelos. Notar que 'User' fue importado como 'UserModel' en index.js, 
-    // pero se almacenó en db.User, por lo que aquí es 'User'.
+ 
     const { User, Sesion, Tarea } = models;
 
     // ====================================================================
@@ -47,7 +46,6 @@ function defineAssociations(models) {
         as: 'sesion', 
     });
 
-    console.log("🤝 Asociaciones de modelos (User, Sesion, Tarea) definidas correctamente.");
 }
 
 export default defineAssociations;
