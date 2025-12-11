@@ -22,12 +22,8 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
   // Función de Encriptación / Codificación
   const encrypt = (text) => {
-    console.log("🔐 Encriptando texto:", text);
-    console.log(`El secret key es: ${SECRET_KEY}`);
-    // Comprobamos si la librería CryptoJS está disponible globalmente
-    // Si no está (lo más probable en este entorno), usamos Base64 (NO SEGURO).
-    // ⚠️ Advertencia: Si el backend espera AES, el login fallará.
-    console.log("CryptoJS disponible:", typeof CryptoJS !== 'undefined' && CryptoJS.AES);
+     // Comprobamos si la librería CryptoJS está disponible globalmente
+        
     if (typeof CryptoJS !== 'undefined' && CryptoJS.AES) {
         return CryptoJS.AES.encrypt(text, SECRET_KEY).toString(); 
     }
@@ -71,10 +67,8 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
     const encryptedUser = encrypt(loginUser);
     const encryptedPassword = encrypt(loginPassword);
-console.log("se encriptan los datos")
     try {
-    console.log("comienza el Login desde el front")
-      // 💡 Nota: Se recomienda usar rutas relativas o un proxy para evitar problemas de CORS
+         // 💡 Nota: Se recomienda usar rutas relativas o un proxy para evitar problemas de CORS
       const response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,11 +79,11 @@ console.log("se encriptan los datos")
       });
 
       const data = await response.json();
-       console.log("Datos recibidos del servidor:", data);
+     
       if (response.ok && data.token) {
         // Llamada a la función de manejo de éxito, que ahora guarda el token
         handleLogin({ token: data.token, user: loginUser });
- console.log('Respuesta del servidor:', data);
+ 
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('UserId', data.user.id);
         console.log("Token guardado en localStorage luego del post-login.", localStorage.getItem('authToken'));
