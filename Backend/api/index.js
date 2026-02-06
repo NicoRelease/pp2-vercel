@@ -3,7 +3,6 @@
 // Importa la aplicación Express definida en server.js
 import log from './log.js';
 import app from '../server.js'; 
-console.log("desde index inicia el servidor")
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     // Si no estamos en producción Y no estamos en Vercel, iniciamos el listener local.

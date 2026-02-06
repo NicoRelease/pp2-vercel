@@ -2,22 +2,18 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../App.css';
 
-/**
- * 💡 Configuración de los enlaces (Variables)
- */
 
 const Title = "Optimizador de Estudio";
 
-// ➡️ ENLACES DE NAVEGACIÓN PRINCIPAL (Para usuarios logueados)
 const mainNavLinks = [
   { path: '/Crear-sesion', label: 'Crear Sesión' },
   { path: '/gestor-estudio', label: 'Listado de sesiones' },
-  //{ path: '//tareas/:tareaId', label: 'Tarea Manager' },
+  
 ];
 
-// ➡️ ENLACES DE AUTENTICACIÓN (Para usuarios NO logueados)
+// Links (Para usuarios NO logueados)
 const authNavLinks = [
-    { path: '/', label: 'Inicio' }, // La ruta raíz suele ser el login
+    { path: '/', label: 'Inicio' },
      
 ];
 
@@ -25,7 +21,7 @@ const HeaderNoLink = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Estilos base para todos los enlaces
+  // Estilos base para todos los links
   const baseLinkStyle = {
     color: 'white',
     margin: '0 15px',
@@ -36,9 +32,7 @@ const HeaderNoLink = () => {
     transition: 'background-color 0.3s, opacity 0.3s',
   };
 
-  /**
-   * Maneja el proceso de cierre de sesión.
-   */
+ 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('UserId');
@@ -76,7 +70,7 @@ const HeaderNoLink = () => {
             onClick={handleLogout}
             
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#c82333'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#dc3545'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4c545eff'}
           >
             Cerrar Sesión
           </button>

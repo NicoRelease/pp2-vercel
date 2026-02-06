@@ -29,7 +29,6 @@ app.get('/prueba', (req, res) => {
 
 app.use('/backend', authRouter); 
 app.use('/backend/sesiones', sesionesRouter);
-console.log("inicia el servidor");
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     app.listen(3000, () => {
