@@ -13,7 +13,7 @@
     },
 
     {
-      "src": "Frontend/package.json", 
+      "src": "FrontEnd/package.json", 
       "use": "@vercel/static-build",
       "config": {
 
@@ -29,11 +29,12 @@
       "src": "/backend/(.*)",
       "dest": "Backend/api/index.js"
     },
-    
-
+    {
+      "handle": "filesystem"
+    },
     {
       "src": "/(.*)",
-      "dest": "Frontend/dist/index.html" 
+      "dest": "FrontEnd/dist/index.html" 
 
     }
   ]

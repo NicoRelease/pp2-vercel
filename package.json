@@ -1,9 +1,15 @@
 {
   "dependencies": {
-    "@vercel/node": "^5.5.15"
+    "@vercel/node": "^5.5.15",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "pg": "^8.18.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7"
   },
-  "scripts": {  
-    "dev:frontend": "npm run dev --prefix FrontEnd", 
+  "scripts": {
+    "dev:frontend": "npm run dev --prefix FrontEnd",
     "dev": "npm run dev:frontend",
     "build": "npm run build --prefix FrontEnd"
   }
