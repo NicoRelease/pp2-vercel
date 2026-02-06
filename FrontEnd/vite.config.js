@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
     // Carga las variables de entorno para usar API_URL
     const rootPath = path.resolve(process.cwd(), '..'); 
     const env = loadEnv(mode, rootPath, '');
-    const API_TARGET = env.VITE_API_TARGET_LOCAL || 'http://localhost:3000';
+    const API_BASE_URL = import.meta.env.VITE_API_URL || '/backend';
 
     
     

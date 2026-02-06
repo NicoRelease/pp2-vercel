@@ -32,7 +32,7 @@ app.use('/backend/sesiones', sesionesRouter);
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     app.listen(3000, () => {
-        console.log('Servidor Backend escuchando en http://localhost:3000');
+        //console.log('Servidor Backend escuchando en http://localhost:3000');
     });
 }
 

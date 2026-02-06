@@ -26,7 +26,7 @@ async function startLocalServer() {
 
     // 2. Escuchar el Puerto
     app.listen(PORT, () => {
-        console.log(`✅ Servidor Express.js iniciado en http://localhost:${PORT}`);
+        //console.log(`✅ Servidor Express.js iniciado en http://localhost:${PORT}`);
     });
 }
 

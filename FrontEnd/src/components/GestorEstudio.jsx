@@ -23,7 +23,7 @@ const GestorEstudio = () => {
   console.log('👤 UserId en GestorEstudio:', userId);
   
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || '/backend';
   
   // Configuración de headers con token
   const getConfig = () => ({
