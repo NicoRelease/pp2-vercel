@@ -23,8 +23,8 @@ app.get('/prueba', (req, res) => {
     });
 });
 
-app.use('/', authRouter); 
-app.use('/sesiones', sesionesRouter);
+app.use('/backend', authRouter); 
+app.use('/backend/sesiones', sesionesRouter);
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     app.listen(3000, () => {

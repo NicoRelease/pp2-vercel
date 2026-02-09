@@ -1,27 +1,15 @@
 {
   "version": 2,
   "builds": [
-    { 
-      "src": "Backend/package.json", 
-      "use": "@vercel/node" 
-    },
-    { 
-      "src": "FrontEnd/package.json", 
-      "use": "@vercel/static-build" 
-    }
+    { "src": "Backend/package.json", "use": "@vercel/node" },
+    { "src": "FrontEnd/package.json", "use": "@vercel/static-build" }
   ],
   "rewrites": [
     { 
-      "source": "/backend/:path*", 
-      "destination": "/Backend/api/index.js" 
+      "source": "/backend/(.*)", 
+      "destination": "Backend/api/index.js" 
     },
-    { 
-      "source": "/assets/:path*", 
-      "destination": "/FrontEnd/assets/:path*" 
-    },
-    { 
-      "source": "/(.*)", 
-      "destination": "/FrontEnd/index.html" 
-    }
+    { "source": "/assets/:path*", "destination": "/FrontEnd/assets/:path*" },
+    { "source": "/(.*)", "destination": "/FrontEnd/index.html" }
   ]
 }
