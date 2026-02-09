@@ -11,11 +11,11 @@
     },
     { 
       "source": "/assets/:path*", 
-      "destination": "/FrontEnd/dist/assets/:path*" 
+      "destination": "/FrontEnd/assets/:path*" 
     },
     { 
       "source": "/(.*)", 
-      "destination": "/FrontEnd/dist/index.html" 
+      "destination": "/FrontEnd/index.html" 
     }
   ]
 }
