@@ -16,7 +16,7 @@
   "rewrites": [
     {
       "source": "/backend/:path*",
-      "destination": "/backend/:path*"
+      "destination": "/Backend/api/index.js"
     },
     {
       "source": "/assets/:path*",
