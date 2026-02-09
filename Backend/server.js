@@ -16,7 +16,7 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-app.get('/prueba', (req, res) => {
+app.get('backend/prueba', (req, res) => {
     res.status(200).json({ 
         status: "OK", 
         message: "El servidor de Express está recibiendo peticiones correctamente." 
