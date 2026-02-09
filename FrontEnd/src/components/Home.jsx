@@ -19,7 +19,7 @@ export default function Home() {
        
 
         <img
-          src="../src/assets/Home.jpg"
+          src="../public/Home.jpg"
           alt="Imagen Home"
           className="rounded-2xl shadow-lg mb-6 w-full max-w-sm h-auto object-cover"
         />
