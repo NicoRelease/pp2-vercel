@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
 import bcrypt from 'bcrypt';
-import dotenv from 'dotenv';
 
-dotenv.config();
+
+
 
 const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || 8, 8);
 

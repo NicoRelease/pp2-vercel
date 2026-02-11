@@ -1,4 +1,5 @@
 import React from 'react';
+import '../App.css';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // ⬅️ Agregamos useNavigate
 
 
@@ -30,17 +31,8 @@ const HeaderInicio = () => {
     const Title = "Optimizador de Estudio";
 
   return (
-    <header style={{ 
-      backgroundColor: '#4c545eff', 
-      color: 'white', 
-      padding: '15px', 
-      textAlign: 'center', 
-      marginBottom: '30px',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-      display: 'flex', // Usamos flexbox para centrar y distribuir mejor
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    }}>
+    <header>
+      
       {/* Contenedor del Título y Navegación */}
       <div style={{ flexGrow: 1, textAlign: 'left' }}> 
         <h1 style={{ marginBottom: '15px', fontSize: '2em', paddingLeft: '15px' }}>
@@ -54,7 +46,6 @@ const HeaderInicio = () => {
         </nav>
 
       </div>
-      
     </header>
   );
 };

@@ -2,10 +2,10 @@
 import cors from 'cors';
 import authRouter from './src/routes/authroutes.js';
 import sesionesRouter from './src/routes/sesiones.routes.js';
-import dotenv from 'dotenv';
+
 import express from 'express';
 
-dotenv.config();
+
 
 const app = express();
 

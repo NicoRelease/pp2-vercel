@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
 import HeaderInicio from './HeaderInicio';
-import HeaderNoLink from './HeaderNoLink';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -14,14 +13,14 @@ export default function Home() {
         
 
       {/* Contenedor de Centrado: Simplificado para depender solo de items-center */}
-      <div className="mx-auto max-w-lg flex flex-col items-center text-center">
+      <div className="Imagen">
         
        
 
         <img
           src="../FrontEnd/Home.jpg"
           alt="Imagen Home"
-          className="rounded-2xl shadow-lg mb-6 w-full max-w-sm h-auto object-cover"
+          className="shadow-lg mb-6 w-full max-w-sm h-auto object-cover"
         />
         
         

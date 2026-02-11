@@ -112,7 +112,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
       <div className="Form-Container">
         <form 
           onSubmit={handleSubmit} 
-          className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100"
+          //className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100"
         >
           
 

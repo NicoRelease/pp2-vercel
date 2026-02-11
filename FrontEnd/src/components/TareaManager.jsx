@@ -1,230 +1,194 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import HeaderNoLink from './HeaderNoLink';
 import '../App.css';
 
 const TareaManager = () => {
   const { tareaId } = useParams();
-  const { state } = useLocation();
   const navigate = useNavigate();
   
   const [tarea, setTarea] = useState(null);
   const [sesion, setSesion] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Estado del cronómetro
-  const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
   const [estaActiva, setEstaActiva] = useState(false);
-  const [modo, setModo] = useState('tarea-especifica');
+  const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
+  const autosaveIntervalRef = useRef(null);
 
   const getConfig = useCallback(() => {
     const authToken = localStorage.getItem('authToken');
-    if (!authToken) {
-      navigate('/Login');
-      return {};
-    }
-    return {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    };
+    if (!authToken) { navigate('/Login'); return {}; }
+    return { headers: { 'Authorization': `Bearer ${authToken}` } };
   }, [navigate]);
 
-  // --- LÓGICA DE CARGA DE DATOS ---
-  const cargarTareaDelDia = useCallback(async () => {
-    setLoading(true);
+  // --- SINCRO: TRAER DATO MAESTRO DE LA DB ---
+  const fetchEstadoActualizado = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/tarea-del-dia/actual`, getConfig());
-      if (response.data.tieneSesiones && response.data.tarea) {
-        setTarea(response.data.tarea);
-        setSesion(response.data.sesion);
-        setModo('tarea-del-dia');
-      } else {
-        setModo('sin-sesiones');
-      }
+      const res = await axios.get(`${API_BASE_URL}/sesiones/tareas/${tareaId}`, getConfig());
+      const tiempoDB = res.data.tiempo_real_ejecucion || 0;
+      const tiempoLocal = parseInt(localStorage.getItem(`temp_time_${tareaId}`)) || 0;
+      
+      // El valor más alto gana (protección contra micro-cortes)
+      const tiempoFinal = Math.max(tiempoDB, tiempoLocal);
+      
+      setTarea(res.data);
+      setSesion(res.data.sesion);
+      setTiempoTranscurrido(tiempoFinal);
+      localStorage.setItem(`temp_time_${tareaId}`, tiempoFinal);
     } catch (err) {
-      setError('Error al cargar tarea del día: ' + (err.response?.data?.message || err.message));
-    } finally {
-      setLoading(false);
+      console.error("Error de sincronización:", err);
     }
-  }, [API_BASE_URL, getConfig]);
+  }, [tareaId, API_BASE_URL, getConfig]);
 
   useEffect(() => {
-    const cargarDatos = async () => {
-      if (tareaId) {
-        setLoading(true);
-        try {
-          const response = await axios.get(`${API_BASE_URL}/sesiones/tareas/${tareaId}`, getConfig());
-          setTarea(response.data);
-          setSesion(response.data.sesion);
-          setModo('tarea-especifica');
-        } catch (err) {
-          setError('Error al cargar tarea específica: ' + (err.response?.data?.message || err.message));
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        cargarTareaDelDia();
-      }
-    };
-    cargarDatos();
-  }, [tareaId, state, API_BASE_URL, getConfig, cargarTareaDelDia]);
+    fetchEstadoActualizado().then(() => setLoading(false));
+  }, [fetchEstadoActualizado]);
 
-  // --- LÓGICA DEL CRONÓMETRO ---
-
-  // Inicializar tiempo desde la DB o LocalStorage
-  useEffect(() => {
-    if (tarea) {
-      const tiempoGuardado = localStorage.getItem(`temp_time_${tarea.id}`);
-      setTiempoTranscurrido(tiempoGuardado ? parseInt(tiempoGuardado) : (tarea.tiempo_real_ejecucion || 0));
-    }
-  }, [tarea]);
-
-  // Intervalo del cronómetro
+  // --- CRONÓMETRO (1s) ---
   useEffect(() => {
     let interval = null;
     if (estaActiva) {
       interval = setInterval(() => {
-        setTiempoTranscurrido((prev) => {
-          const nuevoTiempo = prev + 1;
-          // Backup silencioso en cada segundo
-          if (tarea?.id) localStorage.setItem(`temp_time_${tarea.id}`, nuevoTiempo);
-          return nuevoTiempo;
+        setTiempoTranscurrido(prev => {
+          const nuevo = prev + 1;
+          localStorage.setItem(`temp_time_${tareaId}`, nuevo);
+          return nuevo;
         });
       }, 1000);
-    } else {
-      clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [estaActiva, tarea?.id]);
+  }, [estaActiva, tareaId]);
 
-  const formatTiempo = (segundos) => {
-    const horas = Math.floor(segundos / 3600);
-    const minutos = Math.floor((segundos % 3600) / 60);
-    const segs = segundos % 60;
-    return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
-  };
+  // --- LÓGICA DE AUTOSAVE (Cada 30s) ---
+  useEffect(() => {
+    if (estaActiva) {
+      autosaveIntervalRef.current = setInterval(() => {
+        const tiempoActual = parseInt(localStorage.getItem(`temp_time_${tareaId}`));
+        axios.post(`${API_BASE_URL}/sesiones/tareas/${tareaId}/gestionar`, 
+          { action: 'pause', tiempo_ejecutado: tiempoActual }, getConfig()
+        ).catch(e => console.log("Autosave fallido (sin conexión)"));
+      }, 30000); // 30 segundos
+    } else {
+      clearInterval(autosaveIntervalRef.current);
+    }
+    return () => clearInterval(autosaveIntervalRef.current);
+  }, [estaActiva, tareaId, API_BASE_URL, getConfig]);
 
-  // --- ACCIONES (START, PAUSE, STOP) ---
   const manejarAccion = async (accion) => {
     if (!tarea) return;
 
-    // 1. CAPTURA INMEDIATA (Snapshot)
-    const tiempoCapturado = tiempoTranscurrido;
-
-    // 2. ACTUALIZACIÓN UI INSTANTÁNEA (Optimista)
-    if (accion === 'pause' || accion === 'stop') {
-      setEstaActiva(false); // Detiene el cronómetro visualmente YA
-    } else if (accion === 'start') {
+    if (accion === 'start') {
+      await fetchEstadoActualizado(); // Sincroniza antes de arrancar
       setEstaActiva(true);
+      return;
     }
 
+    // Para PAUSE o STOP
+    const tiempoSnapshot = tiempoTranscurrido;
+    setEstaActiva(false);
+
     try {
-      // 3. PERSISTENCIA EN DB (Segundo plano)
-      const response = await axios.post(
-        `${API_BASE_URL}/sesiones/tareas/${tarea.id}/gestionar`,
-        {
-          action: accion,
-          tiempo_ejecutado: (accion === 'stop' || accion === 'pause') ? tiempoCapturado : 0
-        },
-        getConfig()
+      const res = await axios.post(`${API_BASE_URL}/sesiones/tareas/${tareaId}/gestionar`, 
+        { action: accion, tiempo_ejecutado: tiempoSnapshot }, getConfig()
       );
 
-      // 4. SINCRONIZACIÓN FINAL
-      if (accion === 'pause') {
-        setTarea(response.data.tarea);
-        localStorage.setItem(`temp_time_${tarea.id}`, tiempoCapturado);
-      } else if (accion === 'stop') {
-        setTarea(response.data.tarea);
-        setTiempoTranscurrido(0);
-        setEstaActiva(false);
-        localStorage.removeItem(`temp_time_${tarea.id}`);
+      if (accion === 'stop') {
+        localStorage.removeItem(`temp_time_${tareaId}`);
+        navigate('/gestor-estudio');
+      } else {
+        setTarea(res.data.tarea);
       }
     } catch (err) {
-      console.error("Error en la sincronización:", err);
-      // Si falla la red, el cronómetro ya está pausado, lo cual es correcto para el usuario.
-      alert('Error al guardar en el servidor. El tiempo se mantuvo localmente.');
+      alert('Error al grabar. El tiempo permanece localmente.');
     }
   };
 
-  const eliminarTarea = async () => {
-    if (!tarea || !window.confirm('¿Estás seguro?')) return;
-    try {
-      await axios.delete(`${API_BASE_URL}/sesiones/tareas/${tarea.id}`, getConfig());
-      localStorage.removeItem(`temp_time_${tarea.id}`);
-      modo === 'tarea-del-dia' ? cargarTareaDelDia() : navigate('/gestor-estudio');
-    } catch (err) {
-      alert('Error al eliminar: ' + (err.response?.data?.message || err.message));
-    }
+  const formatTiempo = (s) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const seg = s % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>Cargando...</div>;
-  if (error) return <div style={{ textAlign: 'center', padding: '50px', color: 'red' }}><h3>Error</h3><p>{error}</p></div>;
-
-  if (modo === 'sin-sesiones') {
-    return (
-      <div style={{ maxWidth: '600px', margin: '50px auto', textAlign: 'center', padding: '40px' }}>
-        <div style={{ backgroundColor: '#f8f9fa', padding: '40px', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-          <h1>📚 No hay sesiones activas</h1>
-          <button onClick={() => navigate('/')}>Crear Nueva Sesión</button>
-          <button onClick={() => navigate('/gestor-estudio')}>Ver Gestor de Estudio</button>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div style={{textAlign:'center', padding:'50px'}}>Sincronizando...</div>;
 
   return (
-    <div className="Tarjeta-Principal">
+    <div className="Tarjeta-Principal" style={styles.page}>
       <HeaderNoLink />
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-        <div style={{ backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '10px' }}>
-          <button onClick={() => navigate('/gestor-estudio')}>↩️ Volver</button>
-          <h1>🎯 Gestor de Tarea</h1>
+      <div style={styles.mainLayout}>
+        
+        {/* COLUMNA IZQUIERDA: GESTIÓN */}
+        <div style={styles.leftCol}>
+          <button onClick={() => navigate('/gestor-estudio')} style={styles.btnBack}>↩️ Volver</button>
           
-          {tarea && (
-            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: '20px' }}>
-              <h2>{tarea.nombre}</h2>
-              {tarea.es_completada && <span style={{ color: 'green', fontWeight: 'bold' }}>✅ Completada</span>}
-            </div>
-          )}
+          <div style={styles.card}>
+            <h1 style={styles.taskTitle}>{tarea?.nombre}</h1>
+            {tarea?.es_completada && <span style={styles.doneBadge}>✅ Tarea Completada</span>}
 
-          {tarea && !tarea.es_completada && (
-            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
-              <h3>⏰ Temporizador</h3>
-              <div style={{ fontSize: '2.5em', fontWeight: 'bold', fontFamily: 'monospace', margin: '10px 0' }}>
-                {formatTiempo(tiempoTranscurrido)}
+            {!tarea?.es_completada && (
+              <div style={styles.timerContainer}>
+                <div style={styles.clock}>{formatTiempo(tiempoTranscurrido)}</div>
+                <div style={styles.btnGroup}>
+                  {!estaActiva ? (
+                    <button onClick={() => manejarAccion('start')} style={styles.btnStart}>▶️ Iniciar</button>
+                  ) : (
+                    <button onClick={() => manejarAccion('pause')} style={styles.btnPause}>⏸️ Pausar</button>
+                  )}
+                  <button onClick={() => manejarAccion('stop')} style={styles.btnStop}>⏹️ Finalizar</button>
+                </div>
+                <p style={styles.autosaveText}>{estaActiva ? 'Autosave activo (30s)' : 'Sincronizado'}</p>
               </div>
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                <button onClick={() => manejarAccion('start')} disabled={estaActiva} style={{ backgroundColor: estaActiva ? '#ccc' : '#28a745', color: 'white' }}>
-                  ▶️ Iniciar
-                </button>
-                <button onClick={() => manejarAccion('pause')} disabled={!estaActiva} style={{ backgroundColor: !estaActiva ? '#ccc' : '#ffc107' }}>
-                  ⏸️ Pausar
-                </button>
-                <button onClick={() => manejarAccion('stop')} style={{ backgroundColor: '#dc3545', color: 'white' }}>
-                  ⏹️ Finalizar
-                </button>
-              </div>
-            </div>
-          )}
-
-          {sesion && (
-            <div style={{ backgroundColor: '#fff3cd', padding: '15px', borderRadius: '8px', marginTop: '20px' }}>
-              <h4>📚 Sesión Padre: {sesion.nombre}</h4>
-            </div>
-          )}
-
-          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={eliminarTarea} style={{ backgroundColor: 'transparent', color: '#dc3545', border: '1px solid #dc3545' }}>
-              🗑️ Eliminar Tarea
-            </button>
+            )}
           </div>
         </div>
+
+        {/* COLUMNA DERECHA: RESUMEN (Sticky) */}
+        <aside style={styles.rightCol}>
+          <div style={styles.resumenCard}>
+            <h3 style={styles.resumenTitle}>📊 Resumen General</h3>
+            <div style={styles.divider} />
+            <div style={styles.infoRow}>
+              <span>📚 Sesión:</span>
+              <strong>{sesion?.nombre}</strong>
+            </div>
+            <div style={styles.infoRow}>
+              <span>🎯 Objetivo:</span>
+              <strong>{tarea?.duracion_estimada} min</strong>
+            </div>
+            <div style={styles.infoRow}>
+              <span>⏱️ Estado:</span>
+              <strong style={{color: estaActiva ? '#28a745' : '#666'}}>{estaActiva ? 'En curso' : 'Pausado'}</strong>
+            </div>
+          </div>
+        </aside>
+
       </div>
     </div>
   );
+};
+
+const styles = {
+  page: { minHeight: '100vh', backgroundColor: '#f8f9fa' },
+  mainLayout: { display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '20px', maxWidth: '1100px', margin: '0 auto', padding: '20px' },
+  leftCol: { flex: '1 1 600px' },
+  rightCol: { flex: '1 1 300px' },
+  btnBack: { background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', fontWeight: 'bold', marginBottom: '15px' },
+  card: { backgroundColor: 'white', padding: '30px', borderRadius: '15px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
+  taskTitle: { fontSize: '24px', color: '#333', marginBottom: '10px' },
+  doneBadge: { color: '#28a745', fontWeight: 'bold' },
+  timerContainer: { textAlign: 'center', marginTop: '20px' },
+  clock: { fontSize: '4.5rem', fontWeight: 'bold', fontFamily: 'monospace', margin: '20px 0', color: '#2c3e50' },
+  btnGroup: { display: 'flex', gap: '15px', justifyContent: 'center' },
+  btnStart: { backgroundColor: '#28a745', color: 'white', padding: '15px 30px', borderRadius: '10px', border: 'none', fontSize: '18px', flex: 1, cursor: 'pointer' },
+  btnPause: { backgroundColor: '#ffc107', color: 'black', padding: '15px 30px', borderRadius: '10px', border: 'none', fontSize: '18px', flex: 1, cursor: 'pointer' },
+  btnStop: { backgroundColor: '#dc3545', color: 'white', padding: '15px 30px', borderRadius: '10px', border: 'none', fontSize: '18px', cursor: 'pointer' },
+  autosaveText: { fontSize: '12px', color: '#aaa', marginTop: '15px' },
+  resumenCard: { backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', position: 'sticky', top: '20px' },
+  resumenTitle: { fontSize: '18px', margin: '0 0 10px 0' },
+  divider: { height: '3px', backgroundColor: '#007bff', width: '40px', marginBottom: '15px' },
+  infoRow: { display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }
 };
 
 export default TareaManager;
