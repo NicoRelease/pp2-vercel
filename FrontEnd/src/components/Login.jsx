@@ -112,7 +112,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
       <div className="Form-Container">
         <form 
           onSubmit={handleSubmit} 
-          //className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100"
+          
         >
           
 
@@ -128,37 +128,40 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
           )}
 
           {/* Campo de Usuario */}
-          <div className="mb-5">
+          <div className="Usuario">
             <label className="block text-gray-700 font-medium mb-2" htmlFor="loginUser">
               Correo: 
             </label>
-            <input
+            <div className="InputCorreo">
+                <input
               id="loginUser"
               type="email"
-              className="w-[calc(100%-5px)] p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 shadow-sm"
               value={loginUser}
               onChange={(e) => setLoginUser(e.target.value)}
               placeholder="ej: tu.correo@dominio.com"
               disabled={isLoading}
               required
             />
+            </div>
+            
           </div>
 
           {/* Campo de Contraseña */}
-          <div className="mb-8">
+          <div className="Clave">
             <label className="block text-gray-700 font-medium mb-2" htmlFor="loginPassword">
               Contraseña:
             </label>
+            <div className="Password">
             <input
               id="loginPassword"
               type="password"
-              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 shadow-sm"
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
               placeholder="Ingresa tu contraseña"
               disabled={isLoading}
               required
             />
+            </div>
           </div>
 
           {/* Botón de Submit */}
