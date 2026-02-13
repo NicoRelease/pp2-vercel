@@ -81,6 +81,15 @@ width:100%;
 align-items: center;
 }
 
+.BotonesNavegacion {
+  display:flex;
+  flex-direction:column;
+  justify-content: center;
+  margin-bottom: 30px;
+  border-Bottom: '2px solid #e0e0e0';
+  padding-Bottom: '20px';
+}
+
 
 /* ==========================================================================
    3. FORMULARIOS E INPUTS (Estilo unificado)
@@ -214,4 +223,13 @@ form {
     width: auto;
     padding: 0.6rem 2rem;
   }
+
+ .BotonesNavegacion {
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-bottom: 30px;
+  border-Bottom: '2px solid #e0e0e0';
+  padding-Bottom: '20px';
+} 
 }

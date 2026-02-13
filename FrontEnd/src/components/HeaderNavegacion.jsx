@@ -1,15 +1,10 @@
 // components/HeaderNavegacion.jsx
 import React from 'react';
+import '../App.css';
 
 const HeaderNavegacion = ({ vistaActual, onCambiarVista }) => {
   return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      marginBottom: '30px',
-      borderBottom: '2px solid #e0e0e0',
-      paddingBottom: '20px'
-    }}>
+    <div className= "BotonesNavegacion">
       <button
         onClick={() => onCambiarVista('sesiones')}
         style={{

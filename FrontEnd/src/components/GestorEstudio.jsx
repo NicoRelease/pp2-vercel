@@ -19,9 +19,6 @@ const GestorEstudio = () => {
   const authToken = localStorage.getItem('authToken');
   const userId = localStorage.getItem('UserId');
   
-  console.log('🔑 Auth Token en GestorEstudio:', authToken);
-  console.log('👤 UserId en GestorEstudio:', userId);
-  
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || '/backend';
   
@@ -39,7 +36,6 @@ const GestorEstudio = () => {
 
     // Validar autenticación
     if (!authToken || !userId) {
-      console.error('❌ Token de autenticación o UserId no encontrado. Redirigiendo a login.');
       navigate('/Login');
       setError('No autorizado. Por favor, inicia sesión.');
       setLoading(false);
@@ -47,14 +43,10 @@ const GestorEstudio = () => {
     }
 
     try {
-      console.log('🔍 Iniciando carga de sesiones...');
       
-      // ✅ URL CORREGIDA: /sesiones/user/:UserId (según tu routes.js)
       const url = `${API_BASE_URL}/sesiones/user/${userId}`;
-      console.log('🔗 URL de solicitud:', url);
       
       const response = await axios.get(url, getConfig());
-      console.log('📦 Respuesta recibida:', response.data);
       setData(response.data);
       
     } catch (err) {
