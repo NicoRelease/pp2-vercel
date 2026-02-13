@@ -12,12 +12,12 @@ const StatBox = ({ emoji, label, value, color = '#333' }) => (
 
 const TareasPorFecha = ({ sesiones, onTareaClick, onDeleteTarea, onGestionarTarea }) => {
   
-  // 📌 Definir la fecha de hoy para la comparación
+  //Define la fecha de hoy para la comparación
   const hoy = new Date();
   const hoy1 = hoy.toISOString().split('T')[0];
 
   // ============================================================
-  // 📌 AGRUPAR TAREAS POR FECHA (Lógica original conservada)
+  // AGRUPA TAREAS POR FECHA
   // ============================================================
   const agruparTareasPorFecha = () => {
     if (!sesiones || sesiones.length === 0) return {};
@@ -55,7 +55,10 @@ const TareasPorFecha = ({ sesiones, onTareaClick, onDeleteTarea, onGestionarTare
   const tareasPorFecha = agruparTareasPorFecha();
   const fechas = Object.keys(tareasPorFecha);
 
-  // 📌 CÁLCULO DE ESTADÍSTICAS PARA EL RESUMEN
+  // ============================================================
+  // CÁLCULO DE ESTADÍSTICAS PARA EL RESUMEN
+  // ============================================================
+  
   const stats = useMemo(() => {
     let total = 0;
     let completadas = 0;

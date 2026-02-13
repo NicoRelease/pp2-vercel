@@ -50,13 +50,7 @@ const GestorEstudio = () => {
       setData(response.data);
       
     } catch (err) {
-      // Debug detallado del error
-      console.error('❌ Error completo:', err);
-      console.error('🔗 URL intentada:', err.config?.url);
-      console.error('📋 Método:', err.config?.method);
-      console.error('🔑 Headers:', err.config?.headers);
-      console.error('📊 Status:', err.response?.status);
-      console.error('📝 Response data:', err.response?.data);
+
       
       const errorMsg = 'Error al cargar las sesiones: ' + 
         (err.response?.data?.message || err.response?.data?.error || err.message);
@@ -64,17 +58,10 @@ const GestorEstudio = () => {
       setError(errorMsg);
       
       // Si es error 404, sugerir verificar la ruta
-      if (err.response?.status === 404) {
-        console.error('💡 SUGERENCIA: Verifica que la ruta /sesiones/user/:UserId exista en el backend');
-        console.error('💡 Posibles URLs:');
-        console.error(`  1. ${API_BASE_URL}/sesiones/${userId}`);
-        console.error(`  2. ${API_BASE_URL}/sesiones/user/${userId}`);
-        console.error(`  3. ${API_BASE_URL}/api/sesiones/user/${userId}`);
-      }
+
       
     } finally {
-      setLoading(false);
-      console.log('✅ Carga de sesiones completada');
+      setLoading(false)
     }
   };
 
@@ -84,7 +71,6 @@ const GestorEstudio = () => {
 
   // Funciones de manejo de eventos que se pasarán a los componentes hijos
   const handleTareaClick = (tarea, sesionPadre) => {
-    console.log("📍 Navegando a gestionar tarea:", tarea.id, tarea.nombre);
     navigate(`/tareas/${tarea.id}`, { 
       state: { 
         tarea: tarea,
@@ -94,17 +80,15 @@ const GestorEstudio = () => {
   };
 
   const handleSessionClick = (sesion) => {
-    console.log("📍 Navegando a detalles de sesión:", sesion.id);
     navigate(`/sesiones/${sesion.id}`, { state: { sesion } });
   };
 
   const handleDeleteSession = async (sessionId) => {
     if (!window.confirm("¿Confirmas que deseas eliminar esta sesión de estudio?")) {
-      console.log('❌ Eliminación de sesión cancelada');
       return;
     }
 
-    console.log('🗑️ Eliminando sesión:', sessionId);
+
     try {
       // ✅ URL CORREGIDA: /sesiones/:id
       await axios.delete(`${API_BASE_URL}/sesiones/${sessionId}`, getConfig());
@@ -121,15 +105,11 @@ const GestorEstudio = () => {
 
   const handleDeleteTarea = async (tareaId, tareaNombre) => {
     if (!window.confirm(`⚠️ ¿Deseas eliminar la tarea: "${tareaNombre}"?`)) {
-      console.log('❌ Eliminación de tarea cancelada');
       return;
     }
 
-    console.log('🗑️ Eliminando tarea:', tareaId, tareaNombre);
     try {
-      // ✅ URL CORREGIDA: /sesiones/tareas/:id
       await axios.delete(`${API_BASE_URL}/sesiones/tareas/${tareaId}`, getConfig());
-      console.log('✅ Tarea eliminada con éxito');
       alert(`Tarea "${tareaNombre}" eliminada con éxito.`);
       fetchSesiones();
     } catch (err) {
@@ -141,24 +121,20 @@ const GestorEstudio = () => {
   };
 
   const handleGestionarTarea = async (tareaId, action) => {
-    console.log(`🎯 Gestionando tarea ${tareaId} con acción: ${action}`);
     try {
-      // ✅ URL CORREGIDA: /sesiones/tareas/:id/gestionar
       const response = await axios.post(
         `${API_BASE_URL}/sesiones/tareas/${tareaId}/gestionar`,
         {
           action: action,
           tiempo_ejecutado: 30
         },
-        getConfig() // ✅ CORREGIDO: Pasando config como tercer parámetro
+        getConfig() 
       );
       
-      console.log('✅ Tarea gestionada:', response.data);
       fetchSesiones();
     } catch (err) {
       const errorMsg = 'Error al gestionar tarea: ' + 
         (err.response?.data?.message || err.response?.data?.error || 'Error desconocido');
-      console.error('❌ Error gestionando tarea:', errorMsg, err);
       alert(errorMsg);
     }
   };

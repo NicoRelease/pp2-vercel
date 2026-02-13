@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-// Componente Interno para los cuadros de estadísticas (Basado en tus capturas)
+// Componente Interno para los cuadros de estadísticas
 const StatBox = ({ emoji, label, value, color = '#333' }) => (
   <div style={styles.statBox}>
     <span style={{ fontSize: '18px' }}>{emoji}</span>
@@ -108,7 +108,7 @@ const SesionesList = ({ sesiones, onDeleteSession, onEditSession, onSelectSessio
         </div>
       </div>
 
-      {/* SECCIÓN DERECHA: RESUMEN (Se mueve abajo en móvil) */}
+      {/* SECCIÓN DERECHA: RESUMEN */}
       <aside style={styles.statsSection}>
         <div style={styles.resumenCard}>
           <h3 style={styles.resumenTitle}>📊 Resumen General</h3>
@@ -143,16 +143,16 @@ const styles = {
   mainLayout: {
     display: 'flex',
     flexDirection: 'row',
-    flexWrap: 'wrap', // Permite que el resumen baje en móvil
+    flexWrap: 'wrap', 
     gap: '20px',
     padding: '10px',
     alignItems: 'flex-start'
   },
   listSection: {
-    flex: '1 1 500px', // Crece y se achica, base de 500px
+    flex: '1 1 500px', 
   },
   statsSection: {
-    flex: '1 1 300px', // Base de 300px para el resumen
+    flex: '1 1 300px', 
   },
   sessionGroup: {
     display: 'flex',
@@ -185,7 +185,7 @@ const styles = {
   btnAction: { background: '#f8f9fa', border: '1px solid #ddd', borderRadius: '4px', padding: '5px 10px', cursor: 'pointer' },
   buttonGroup: { display: 'flex', gap: '5px' },
   
-  // Estilos del Resumen (Basados en tus imágenes)
+ 
   resumenCard: {
     backgroundColor: '#f8f9fa',
     padding: '20px',

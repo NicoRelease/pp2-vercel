@@ -233,3 +233,141 @@ form {
   padding-Bottom: '20px';
 } 
 }
+
+/* ==========================================================================
+   6. TAREA MANAGER
+   ========================================================================== */
+
+.tm-page {
+  background-color: #f8f9fa !important;
+  align-items: center;
+}
+
+.Tarea {
+  display: flex;
+  flex-direction: row;
+  align-items:flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.Contador {
+    flex: 1 1 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: inherit;
+  }
+
+.Resumen {
+    flex: 1 1 300px;
+  }
+
+.Espacio {
+height: 70px;
+}
+
+.tm-btn-back {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 19px;
+  display: block;
+}
+
+.tm-card {
+  background-color: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  width: 100%;
+}
+
+.tm-task-title {
+  font-size: 24px !important;
+  color: #333;
+  margin-bottom: 10px;
+  text-align: left; /* Título de tarea a la izquierda */
+}
+
+.tm-done-badge { color: #28a745; font-weight: bold; }
+
+.tm-timer-container { text-align: center; margin-top: 20px; }
+
+.tm-clock {
+  font-size: 4.5rem;
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+  margin: 20px 0;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.tm-btn-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+/* Botones de acción del cronómetro */
+.tm-btn-start, .tm-btn-pause, .tm-btn-stop {
+  padding: 15px 30px;
+  border-radius: 10px;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.1s;
+}
+
+.tm-btn-start { background-color: #28a745; color: white; flex: 1; }
+.tm-btn-pause { background-color: #ffc107; color: black; flex: 1; }
+.tm-btn-stop { background-color: #dc3545; color: white; flex:1;}
+
+.tm-btn-start:active, .tm-btn-pause:active, .tm-btn-stop:active {
+  transform: scale(0.98);
+}
+
+.tm-autosave-text {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 15px;
+  text-align: center;
+}
+
+/* Tarjeta de Resumen (Derecha) */
+.tm-resumen-card {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 20px;
+}
+
+.tm-resumen-title { font-size: 18px; margin: 0 0 10px 0; font-weight: bold; }
+.tm-divider { height: 3px; background-color: #007bff; width: 40px; margin-bottom: 15px; }
+
+.tm-info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.text-active { color: #28a745; }
+.text-paused { color: #666; }
+
+.loading-screen { text-align: center; padding: 50px; font-weight: bold; }
+
+/* Ajuste responsive para la columna de resumen */
+@media (max-width: 768px) {
+  .tm-main-layout { flex-direction: column; }
+  .tm-right-col { flex: 1 1 auto; }
+  .tm-clock { font-size: 3rem; }
+}

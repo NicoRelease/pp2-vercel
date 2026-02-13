@@ -11,7 +11,7 @@ const encrypt = (text) => {
     if (typeof CryptoJS !== 'undefined' && CryptoJS.AES) {
         return CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
     }
-    console.error("❌ ERROR: CryptoJS no disponible.");
+    console.error("ERROR: Crypto no disponible.");
     return text;
 };
 
@@ -91,7 +91,7 @@ export default function Register() {
                         <label className="block text-gray-700 font-medium mb-2" htmlFor="username">
                             Nombre completo:
                         </label>
-                        <div className="InputCorreo"> {/* Usamos la misma clase contenedora que el login */}
+                        <div className="InputCorreo">
                             <input
                                 id="username"
                                 type="text"
