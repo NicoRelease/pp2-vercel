@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>README - Plataforma de Gestión de Estudio</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #24292e;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f6f8fa;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        h1 { border-bottom: 2px solid #eaecef; padding-bottom: 10px; color: #0366d6; }
+        h2 { border-bottom: 1px solid #eaecef; padding-bottom: 5px; margin-top: 30px; color: #24292e; }
+        h3 { color: #444; }
+        code {
+            background-color: #f3f3f3;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 90%;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow: auto;
+            border: 1px solid #e1e4e8;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        table th, table td {
+            border: 1px solid #dfe2e5;
+            padding: 12px;
+            text-align: left;
+        }
+        table th { background-color: #f6f8fa; }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            background-color: #28a745;
+            color: white;
+        }
+        .info-box {
+            background-color: #e7f3ff;
+            border-left: 5px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎓 Plataforma de Gestión de Sesiones de Estudio</h1>
+    <p>Proyecto Final desarrollado para la materia <strong>PP2</strong>. Aplicación Full-Stack para la planificación automática de tareas de estudio y gestión de exámenes.</p>
+
+    <div class="info-box">
+        <strong>🌐 Deploy en Producción:</strong> 
+        <a href="TU_URL_DE_VERCEL_AQUÍ" target="_blank">Visitar Aplicación en Vercel</a>
+    </div>
+
+    <h2>📊 Estado del Proyecto (Code Coverage)</h2>
+    <p>Reporte de pruebas unitarias generadas con <strong>Jest</strong>, cumpliendo con los estándares de calidad y cobertura exigidos.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Métrica</th>
+                <th>Resultado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Test Suites</td>
+                <td>2 passed, 2 total</td>
+            </tr>
+            <tr>
+                <td>Tests</td>
+                <td>10 passed, 10 total</td>
+            </tr>
+            <tr>
+                <td><strong>Cobertura de Sentencias (% Stmts)</strong></td>
+                <td><span class="badge">58.16%</span></td>
+            </tr>
+            <tr>
+                <td><strong>Cobertura de Líneas (% Lines)</strong></td>
+                <td><span class="badge">60.00%</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>🏗️ Arquitectura del Sistema</h2>
+    <ul>
+        <li><strong>Arquitectura:</strong> MVC (Modelo-Vista-Controlador).</li>
+        <li><strong>Backend:</strong> Node.js con Express, estructurado en capas de Controladores y Servicios.</li>
+        <li><strong>Frontend:</strong> React.js con hooks para gestión de estado.</li>
+        <li><strong>Persistencia:</strong> PostgreSQL mediante Sequelize ORM.</li>
+        <li><strong>Seguridad:</strong> Autenticación mediante JSON Web Tokens (JWT).</li>
+    </ul>
+
+    <h2>💻 Guía de Instalación Local</h2>
+    
+    <h3>1. Clonar el repositorio</h3>
+    <pre>git clone https://github.com/NicoRelease/pp2-vercel.git
+         cd pp2-vercel
+    </pre>
+
+    <h3>2. Instalación de Dependencias</h3>
+    <p>Instale los módulos de Node necesarios para el proyecto:</p>
+    <pre>npm install</pre>
+
+    <h3>3. Configuración de Vercel Environment</h3>
+    <p>Este proyecto está integrado nativamente con <strong>Vercel</strong> para el despliegue de Serverless Functions.</p>
+    <ol>
+        <li>Instalar Vercel CLI globalmente: <code>npm i -g vercel</code></li>
+        <li>Iniciar sesión: <code>vercel login</code></li>
+        <li>Vincular proyecto: <code>vercel link</code></li>
+        <li>Descargar variables de entorno: <code>vercel env pull</code></li>
+    </ol>
+
+    <h3>4. Ejecución en modo Desarrollo</h3>
+    <p>Para iniciar la aplicación localmente utilizando el motor de Vercel:</p>
+    <pre>vercel dev</pre>
+    <p>El servidor se iniciará típicamente en <code>http://localhost:3000</code>.</p>
+
+    <h2>🧪 Pruebas Unitarias</h2>
+    <p>Para ejecutar la suite de tests y generar el reporte de cobertura en consola:</p>
+    <pre>npm test</pre>
+
+    <h2>📁 Documentación Adicional</h2>
+    <p>Para más detalles sobre el diseño de software, consulte el <strong>Informe Técnico PDF</strong> que incluye:</p>
+    <ul>
+        <li>Diagrama de Entidad-Relación (DER).</li>
+        <li>Análisis de Casos de Uso.</li>
+        <li>Descripción de la Capa de Servicios y Manejo de Errores.</li>
+    </ul>
+
+    <hr style="margin-top: 50px; border: 0; border-top: 1px solid #eee;">
+    <p style="text-align: center; color: #888; font-size: 12px;">
+        Desarrollado para la cátedra de Programación - 2026
+    </p>
+</div>
+
+</body>
+</html>
