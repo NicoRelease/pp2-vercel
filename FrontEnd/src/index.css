@@ -27,7 +27,8 @@ a:hover {
 /* --- CONTENEDORES PRINCIPALES --- */
 
 body {
-  margin: 0;
+  margin-left:5px;
+  margin-right:5px;
   display: flex; 
   place-items: center; 
   min-width: 320px;
@@ -36,14 +37,9 @@ body {
 }
 
 main {
-  
   width: 100%;
-  padding: 20px;
   box-sizing: border-box;
-  
-
   display: flex;
-
   flex-wrap: wrap; 
   justify-content: space-around; 
   align-items: flex-start; 
@@ -65,7 +61,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #f9f9f9;
   cursor: pointer;
   transition: border-color 0.25s;
   margin: 0.5em; 

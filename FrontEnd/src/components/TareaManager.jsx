@@ -1,227 +1,163 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import HeaderNoLink from './HeaderNoLink';
 import '../App.css';
 
 const TareaManager = () => {
   const { tareaId } = useParams();
-  const { state } = useLocation();
   const navigate = useNavigate();
   
   const [tarea, setTarea] = useState(null);
   const [sesion, setSesion] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Estado del cronómetro
-  const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
   const [estaActiva, setEstaActiva] = useState(false);
-  const [modo, setModo] = useState('tarea-especifica');
+  const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
+  const autosaveIntervalRef = useRef(null);
 
   const getConfig = useCallback(() => {
     const authToken = localStorage.getItem('authToken');
-    if (!authToken) {
-      navigate('/Login');
-      return {};
-    }
-    return {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    };
+    if (!authToken) { navigate('/Login'); return {}; }
+    return { headers: { 'Authorization': `Bearer ${authToken}` } };
   }, [navigate]);
 
-  // --- LÓGICA DE CARGA DE DATOS ---
-  const cargarTareaDelDia = useCallback(async () => {
-    setLoading(true);
+  const fetchEstadoActualizado = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/tarea-del-dia/actual`, getConfig());
-      if (response.data.tieneSesiones && response.data.tarea) {
-        setTarea(response.data.tarea);
-        setSesion(response.data.sesion);
-        setModo('tarea-del-dia');
-      } else {
-        setModo('sin-sesiones');
-      }
+      const res = await axios.get(`${API_BASE_URL}/sesiones/tareas/${tareaId}`, getConfig());
+      const tiempoDB = res.data.tiempo_real_ejecucion || 0;
+      const tiempoLocal = parseInt(localStorage.getItem(`temp_time_${tareaId}`)) || 0;
+      const tiempoFinal = Math.max(tiempoDB, tiempoLocal);
+      
+      setTarea(res.data);
+      setSesion(res.data.sesion);
+      setTiempoTranscurrido(tiempoFinal);
+      localStorage.setItem(`temp_time_${tareaId}`, tiempoFinal);
     } catch (err) {
-      setError('Error al cargar tarea del día: ' + (err.response?.data?.message || err.message));
-    } finally {
-      setLoading(false);
+      console.error("Error de sincronización:", err);
     }
-  }, [API_BASE_URL, getConfig]);
+  }, [tareaId, API_BASE_URL, getConfig]);
 
   useEffect(() => {
-    const cargarDatos = async () => {
-      if (tareaId) {
-        setLoading(true);
-        try {
-          const response = await axios.get(`${API_BASE_URL}/sesiones/tareas/${tareaId}`, getConfig());
-          setTarea(response.data);
-          setSesion(response.data.sesion);
-          setModo('tarea-especifica');
-        } catch (err) {
-          setError('Error al cargar tarea específica: ' + (err.response?.data?.message || err.message));
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        cargarTareaDelDia();
-      }
-    };
-    cargarDatos();
-  }, [tareaId, state, API_BASE_URL, getConfig, cargarTareaDelDia]);
+    fetchEstadoActualizado().then(() => setLoading(false));
+  }, [fetchEstadoActualizado]);
 
-  // --- LÓGICA DEL CRONÓMETRO ---
-
-  // Inicializar tiempo desde la DB o LocalStorage
-  useEffect(() => {
-    if (tarea) {
-      const tiempoGuardado = localStorage.getItem(`temp_time_${tarea.id}`);
-      setTiempoTranscurrido(tiempoGuardado ? parseInt(tiempoGuardado) : (tarea.tiempo_real_ejecucion || 0));
-    }
-  }, [tarea]);
-
-  // Intervalo del cronómetro
   useEffect(() => {
     let interval = null;
     if (estaActiva) {
       interval = setInterval(() => {
-        setTiempoTranscurrido((prev) => {
-          const nuevoTiempo = prev + 1;
-          // Backup silencioso en cada segundo
-          if (tarea?.id) localStorage.setItem(`temp_time_${tarea.id}`, nuevoTiempo);
-          return nuevoTiempo;
+        setTiempoTranscurrido(prev => {
+          const nuevo = prev + 1;
+          localStorage.setItem(`temp_time_${tareaId}`, nuevo);
+          return nuevo;
         });
       }, 1000);
-    } else {
-      clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [estaActiva, tarea?.id]);
+  }, [estaActiva, tareaId]);
 
-  const formatTiempo = (segundos) => {
-    const horas = Math.floor(segundos / 3600);
-    const minutos = Math.floor((segundos % 3600) / 60);
-    const segs = segundos % 60;
-    return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
-  };
+  useEffect(() => {
+    if (estaActiva) {
+      autosaveIntervalRef.current = setInterval(() => {
+        const tiempoActual = parseInt(localStorage.getItem(`temp_time_${tareaId}`));
+        axios.post(`${API_BASE_URL}/sesiones/tareas/${tareaId}/gestionar`, 
+          { action: 'pause', tiempo_ejecutado: tiempoActual }, getConfig()
+        ).catch(e => console.log("Autosave fallido"));
+      }, 30000);
+    } else {
+      clearInterval(autosaveIntervalRef.current);
+    }
+    return () => clearInterval(autosaveIntervalRef.current);
+  }, [estaActiva, tareaId, API_BASE_URL, getConfig]);
 
-  // --- ACCIONES (START, PAUSE, STOP) ---
   const manejarAccion = async (accion) => {
     if (!tarea) return;
-
-    // 1. CAPTURA INMEDIATA (Snapshot)
-    const tiempoCapturado = tiempoTranscurrido;
-
-    // 2. ACTUALIZACIÓN UI INSTANTÁNEA (Optimista)
-    if (accion === 'pause' || accion === 'stop') {
-      setEstaActiva(false); // Detiene el cronómetro visualmente YA
-    } else if (accion === 'start') {
+    if (accion === 'start') {
+      await fetchEstadoActualizado();
       setEstaActiva(true);
+      return;
     }
-
+    const tiempoSnapshot = tiempoTranscurrido;
+    setEstaActiva(false);
     try {
-      // 3. PERSISTENCIA EN DB (Segundo plano)
-      const response = await axios.post(
-        `${API_BASE_URL}/sesiones/tareas/${tarea.id}/gestionar`,
-        {
-          action: accion,
-          tiempo_ejecutado: (accion === 'stop' || accion === 'pause') ? tiempoCapturado : 0
-        },
-        getConfig()
+      const res = await axios.post(`${API_BASE_URL}/sesiones/tareas/${tareaId}/gestionar`, 
+        { action: accion, tiempo_ejecutado: tiempoSnapshot }, getConfig()
       );
-
-      // 4. SINCRONIZACIÓN FINAL
-      if (accion === 'pause') {
-        setTarea(response.data.tarea);
-        localStorage.setItem(`temp_time_${tarea.id}`, tiempoCapturado);
-      } else if (accion === 'stop') {
-        setTarea(response.data.tarea);
-        setTiempoTranscurrido(0);
-        setEstaActiva(false);
-        localStorage.removeItem(`temp_time_${tarea.id}`);
+      if (accion === 'stop') {
+        localStorage.removeItem(`temp_time_${tareaId}`);
+        navigate('/gestor-estudio');
+      } else {
+        setTarea(res.data.tarea);
       }
     } catch (err) {
-      console.error("Error en la sincronización:", err);
-      // Si falla la red, el cronómetro ya está pausado, lo cual es correcto para el usuario.
-      alert('Error al guardar en el servidor. El tiempo se mantuvo localmente.');
+      alert('Error al grabar.');
     }
   };
 
-  const eliminarTarea = async () => {
-    if (!tarea || !window.confirm('¿Estás seguro?')) return;
-    try {
-      await axios.delete(`${API_BASE_URL}/sesiones/tareas/${tarea.id}`, getConfig());
-      localStorage.removeItem(`temp_time_${tarea.id}`);
-      modo === 'tarea-del-dia' ? cargarTareaDelDia() : navigate('/gestor-estudio');
-    } catch (err) {
-      alert('Error al eliminar: ' + (err.response?.data?.message || err.message));
-    }
+  const formatTiempo = (s) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const seg = s % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>Cargando...</div>;
-  if (error) return <div style={{ textAlign: 'center', padding: '50px', color: 'red' }}><h3>Error</h3><p>{error}</p></div>;
-
-  if (modo === 'sin-sesiones') {
-    return (
-      <div style={{ maxWidth: '600px', margin: '50px auto', textAlign: 'center', padding: '40px' }}>
-        <div style={{ backgroundColor: '#f8f9fa', padding: '40px', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-          <h1>📚 No hay sesiones activas</h1>
-          <button onClick={() => navigate('/')}>Crear Nueva Sesión</button>
-          <button onClick={() => navigate('/gestor-estudio')}>Ver Gestor de Estudio</button>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="loading-screen">Sincronizando...</div>;
 
   return (
-    <div className="Tarjeta-Principal">
+    <div className="Tarjeta-Principal tm-page">
       <HeaderNoLink />
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-        <div style={{ backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '10px' }}>
-          <button onClick={() => navigate('/gestor-estudio')}>↩️ Volver</button>
-          <h1>🎯 Gestor de Tarea</h1>
+      <div className="Tarea">
+        
+        {/* COLUMNA IZQUIERDA: GESTIÓN */}
+        <div className="Contador">
+          <button onClick={() => navigate('/gestor-estudio')} className="tm-btn-back">↩️ Volver</button>
           
-          {tarea && (
-            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: '20px' }}>
-              <h2>{tarea.nombre}</h2>
-              {tarea.es_completada && <span style={{ color: 'green', fontWeight: 'bold' }}>✅ Completada</span>}
-            </div>
-          )}
+          <div className="tm-card">
+            <h1 className="tm-task-title">{tarea?.nombre}</h1>
+            {tarea?.es_completada && <span className="tm-done-badge">✅ Tarea Completada</span>}
 
-          {tarea && !tarea.es_completada && (
-            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
-              <h3>⏰ Temporizador</h3>
-              <div style={{ fontSize: '2.5em', fontWeight: 'bold', fontFamily: 'monospace', margin: '10px 0' }}>
-                {formatTiempo(tiempoTranscurrido)}
+            {!tarea?.es_completada && (
+              <div className="tm-timer-container">
+                <div className="tm-clock">{formatTiempo(tiempoTranscurrido)}</div>
+                <div className="tm-btn-group">
+                  {!estaActiva ? (
+                    <button onClick={() => manejarAccion('start')} className="tm-btn-start">▶️ Iniciar</button>
+                  ) : (
+                    <button onClick={() => manejarAccion('pause')} className="tm-btn-pause">⏸️ Pausar</button>
+                  )}
+                  <button onClick={() => manejarAccion('stop')} className="tm-btn-stop">⏹️ Finalizar</button>
+                </div>
+                <p className="tm-autosave-text">{estaActiva ? 'Autosave activo (30s)' : 'Sincronizado'}</p>
               </div>
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                <button onClick={() => manejarAccion('start')} disabled={estaActiva} style={{ backgroundColor: estaActiva ? '#ccc' : '#28a745', color: 'white' }}>
-                  ▶️ Iniciar
-                </button>
-                <button onClick={() => manejarAccion('pause')} disabled={!estaActiva} style={{ backgroundColor: !estaActiva ? '#ccc' : '#ffc107' }}>
-                  ⏸️ Pausar
-                </button>
-                <button onClick={() => manejarAccion('stop')} style={{ backgroundColor: '#dc3545', color: 'white' }}>
-                  ⏹️ Finalizar
-                </button>
-              </div>
-            </div>
-          )}
-
-          {sesion && (
-            <div style={{ backgroundColor: '#fff3cd', padding: '15px', borderRadius: '8px', marginTop: '20px' }}>
-              <h4>📚 Sesión Padre: {sesion.nombre}</h4>
-            </div>
-          )}
-
-          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={eliminarTarea} style={{ backgroundColor: 'transparent', color: '#dc3545', border: '1px solid #dc3545' }}>
-              🗑️ Eliminar Tarea
-            </button>
+            )}
           </div>
         </div>
+
+        {/* COLUMNA DERECHA: RESUMEN */}
+        
+        <aside className="Resumen">
+          <div className="Espacio"></div>
+          <div className="tm-resumen-card">
+            <h3 className="tm-resumen-title">📊 Resumen General</h3>
+            <div className="tm-divider" />
+            <div className="tm-info-row">
+              <span>📚 Sesión:</span>
+              <strong>{sesion?.nombre}</strong>
+            </div>
+            <div className="tm-info-row">
+              <span>🎯 Objetivo:</span>
+              <strong>{tarea?.duracion_estimada} min</strong>
+            </div>
+            <div className="tm-info-row">
+              <span>⏱️ Estado:</span>
+              <strong className={estaActiva ? 'text-active' : 'text-paused'}>
+                {estaActiva ? 'En curso' : 'Pausado'}
+              </strong>
+            </div>
+          </div>
+        </aside>
+
       </div>
     </div>
   );
