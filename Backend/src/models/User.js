@@ -59,11 +59,8 @@ export default (sequelize) => {
         
         hooks: {
             // Se ejecuta antes de crear el usuario (útil si el hash viene del service o se hace aquí)
-            beforeCreate: async (user) => {
-                if (user.password) {
-                    user.password = await bcrypt.hash(user.password, BCRYPT_SALT_ROUNDS);
-                }
-            },
+            
+
             // Se ejecuta al actualizar la contraseña
             beforeUpdate: async (user) => {
                 if (user.changed('password')) {
