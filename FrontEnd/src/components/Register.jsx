@@ -6,7 +6,6 @@ import CryptoJS from 'crypto-js';
 
 const SECRET_KEY = import.meta.env.VITE_CLIENT_SECRET_KEY;
 
-// Función de Encriptación
 const encrypt = (text) => {
     if (typeof CryptoJS !== 'undefined' && CryptoJS.AES) {
         return CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
@@ -19,7 +18,6 @@ export default function Register() {
     const navigate = useNavigate();
     const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-    // Estado para capturar los datos del formulario
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -28,7 +26,6 @@ export default function Register() {
 
     const handleRegister = async (e) => {
         e.preventDefault();
-
         if (!username || !email || !password) {
             setError('Todos los campos son obligatorios.');
             return;
@@ -58,8 +55,18 @@ export default function Register() {
             } else {
                 localStorage.setItem('authToken', data.token);
                 localStorage.setItem('UserId', data.user.id);
-                alert('¡Registro exitoso! Serás redirigido.');
-                navigate('/crear-sesion');
+                localStorage.setItem('user', JSON.stringify(data.user));
+
+                alert('¡Registro exitoso!');
+                
+                // LÓGICA DE REDIRECCIÓN MANTENIENDO EL HASHEO FUNCIONAL
+                if (data.user.rol_id === 1) {
+                    navigate('/admin-dashboard');
+                } else if (data.user.estado === false) {
+                    navigate('/waiting-room');
+                } else {
+                    navigate('/crear-sesion');
+                }
             }
         } catch (err) {
             setError('Error de conexión con el servidor.');
@@ -71,91 +78,32 @@ export default function Register() {
     return (
         <div className="Tarjeta-Principal">
             <HeaderNoLink />
-
             <div className="Form-Container">
                 <form onSubmit={handleRegister}>
-                    
-                    {/* Mensaje de Error */}
-                    {error && (
-                        <div 
-                            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm" 
-                            role="alert"
-                        >
-                            <p className="font-semibold">Error:</p>
-                            <p>{error}</p>
-                        </div>
-                    )}
-
-                    {/* Campo Nombre Completo */}
+                    {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">{error}</div>}
                     <div className="Usuario">
-                        <label className="block text-gray-700 font-medium mb-2" htmlFor="username">
-                            Nombre completo:
-                        </label>
+                        <label className="block text-gray-700 font-medium mb-2">Nombre completo:</label>
                         <div className="InputCorreo">
-                            <input
-                                id="username"
-                                type="text"
-                                placeholder="Tu nombre de usuario"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                disabled={loading}
-                                required
-                            />
+                            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
                         </div>
                     </div>
-
-                    {/* Campo Correo */}
                     <div className="Usuario">
-                        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">
-                            Correo:
-                        </label>
+                        <label className="block text-gray-700 font-medium mb-2">Correo:</label>
                         <div className="InputCorreo">
-                            <input
-                                id="email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="ej: tu.correo@dominio.com"
-                                disabled={loading}
-                                required
-                            />
+                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                         </div>
                     </div>
-
-                    {/* Campo Contraseña */}
                     <div className="Clave">
-                        <label className="block text-gray-700 font-medium mb-2" htmlFor="password">
-                            Contraseña:
-                        </label>
+                        <label className="block text-gray-700 font-medium mb-2">Contraseña:</label>
                         <div className="Password">
-                            <input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Crea una contraseña segura"
-                                disabled={loading}
-                                required
-                            />
+                            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                         </div>
                     </div>
-
-                    {/* Botón de Registro */}
-                    <button
-                        type="submit"
-                        className={`w-full py-3 px-4 rounded-xl text-black font-bold transition duration-300 ${
-                            loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 shadow-lg'
-                        }`}
-                        disabled={loading}
-                    >
+                    <button type="submit" className={`w-full py-3 px-4 rounded-xl text-black font-bold ${loading ? 'bg-blue-400' : 'bg-blue-600'}`} disabled={loading}>
                         {loading ? 'Registrando...' : 'Registrar Cuenta'}
                     </button>
-
-                    {/* Enlace al Login */}
                     <div className="mt-6 text-center">
-                        <Link to="/Login" className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline transition duration-150">
-                            ¿Ya tienes cuenta? Inicia sesión aquí.
-                        </Link>
+                        <Link to="/Login" className="text-sm font-semibold text-blue-600">¿Ya tienes cuenta? Inicia sesión.</Link>
                     </div>
                 </form>
             </div>

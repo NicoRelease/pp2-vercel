@@ -1,27 +1,34 @@
-// /src/services/auth.service.js
+// src/services/auth.service.js
 
 import db from '../models/index.js'; 
 import bcrypt from 'bcrypt'; 
 import jwt from 'jsonwebtoken'; 
-// Importar CryptoJS si aún usas la encriptación de transporte
-// import CryptoJS from 'crypto-js'; 
 
-const JWT_SECRET = process.env.JWT_SECRET || 'clave_jwt_por_defecto'; // Asegura un valor por defecto
+const JWT_SECRET = process.env.JWT_SECRET || 'clave_jwt_por_defecto';
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || 10, 10);
 
-// Esta función es LÓGICA de negocio. Es candidata para TESTING con Jest.
-const generateToken = (id) => {
-    return jwt.sign({ id }, JWT_SECRET, {
-        expiresIn: '30d', 
-    });
+/**
+ * Genera un token JWT incluyendo la información de seguridad del usuario.
+ * Esto permite que el group_id y rol_id estén disponibles en cada petición
+ * sin necesidad de consultar la base de datos constantemente.
+ */
+const generateToken = (user) => {
+    return jwt.sign(
+        { 
+            id: user.id, 
+            rol_id: user.rol_id, 
+            group_id: user.group_id 
+        }, 
+        JWT_SECRET, 
+        { expiresIn: '30d' }
+    );
 };
 
 // =======================================================
 // SERVICIO DE LOGIN
 // =======================================================
 export const loginUser = async (userIdentifier, password) => { 
-    // Nota: Aquí se asume que la desencriptación de transporte ya ocurrió en el controller (ver Paso 2)
-
+    // Buscamos al usuario por username o email usando el operador OR de Sequelize
     const user = await db.User.findOne({
         where: {
             [db.Op.or]: [
@@ -31,15 +38,33 @@ export const loginUser = async (userIdentifier, password) => {
         }
     });
 
+    // 1. Validar existencia y contraseña
     if (!user || !(await bcrypt.compare(password, user.password))) {
-        // En lugar de devolver un 401, lanzamos un error que el Controller capturará
         const error = new Error("Credenciales inválidas. Usuario o contraseña incorrectos.");
         error.status = 401; 
         throw error;
     }
 
-    const token = generateToken(user.id);
-    return { user: { id: user.id, username: user.username, email: user.email }, token };
+    // 2. VALIDACIÓN DE ESTADO: Verificar si el SysAdmin ha desactivado la cuenta
+    if (user.estado === false) {
+        const error = new Error("Acceso denegado. Tu cuenta está inactiva o pendiente de aprobación.");
+        error.status = 403; // Forbidden
+        throw error;
+    }
+
+    const token = generateToken(user);
+
+    return { 
+        user: { 
+            id: user.id, 
+            username: user.username, 
+            email: user.email,
+            rol_id: user.rol_id,
+            group_id: user.group_id,
+            estado: user.estado
+        }, 
+        token 
+    };
 };
 
 // =======================================================
@@ -47,7 +72,7 @@ export const loginUser = async (userIdentifier, password) => {
 // =======================================================
 export const registerUser = async (username, email, plainPassword) => {
     
-    // 1. Verificar existencia
+    // 1. Verificar si el correo ya existe para evitar duplicados
     const userExists = await db.User.findOne({ where: { email } });
     if (userExists) {
         const error = new Error("El correo electrónico ya está registrado.");
@@ -55,16 +80,60 @@ export const registerUser = async (username, email, plainPassword) => {
         throw error;
     }
 
-    // 2. Hashing (LÓGICA CRÍTICA para TESTING)
+    /**
+     * 2. Lógica de Onboarding Jerárquica:
+     * Determinamos el ROL, GRUPO y ESTADO inicial cruzando las Whitelists.
+     */
+    let rol_id = 3;     // Valor por defecto: Usuario Regular
+    let group_id = null;
+    let estado = false; // Por defecto: Inactivo (esperando decisión o asignación)
+
+    // A. ¿Es System Admin? (Consultamos la Whitelist Global)
+    const sysAdminEntry = await db.Whitelist.findOne({ 
+        where: { email: email, activo: true } 
+    });
+
+    if (sysAdminEntry) {
+        rol_id = 1;    // ID correspondiente a 'System Admin'
+        estado = true; // Se activa automáticamente
+    } else {
+        // B. ¿Es un usuario invitado a una instancia? (Consultamos GroupWhitelist)
+        const groupEntry = await db.GroupWhitelist.findOne({ 
+            where: { email: email } 
+        });
+
+        if (groupEntry) {
+            rol_id = 3; // Mantiene rol 'Usuario'
+            group_id = groupEntry.group_id; // Se vincula a su instancia/equipo
+            estado = true; // Se activa automáticamente por estar pre-aprobado por el GroupAdmin
+        }
+    }
+
+    // 3. Encriptación de la contraseña
     const hashedPassword = await bcrypt.hash(plainPassword, SALT_ROUNDS);
 
-    // 3. Crear usuario
+    // 4. Creación del registro final en la tabla 'users'
     const newUser = await db.User.create({
         username,
         email,
         password: hashedPassword,
+        rol_id,
+        group_id,
+        estado
     });
 
-    const token = generateToken(newUser.id);
-    return { user: { id: newUser.id, username: newUser.username, email: newUser.email }, token };
+    // Generamos el token con la sesión ya iniciada
+    const token = generateToken(newUser);
+    
+    return { 
+        user: { 
+            id: newUser.id, 
+            username: newUser.username, 
+            email: newUser.email,
+            rol_id: newUser.rol_id,
+            group_id: newUser.group_id,
+            estado: newUser.estado
+        }, 
+        token 
+    };
 };

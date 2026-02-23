@@ -4,7 +4,7 @@ import { TIME } from 'sequelize';
 import * as authService from '../services/auth.service.js';
 import CryptoJS from 'crypto-js';
 
-const CLIENT_SECRET_KEY = process.env.CLIENT_SECRET_KEY || 'clave-secreta-255bits'; 
+const CLIENT_SECRET_KEY = process.env.VITE_CLIENT_SECRET_KEY; 
 
 // =======================================================
 // FUNCIÓN DE DESENCRIPTACIÓN (LA QUE FALTABA)
