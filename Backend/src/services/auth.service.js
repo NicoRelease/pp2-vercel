@@ -5,7 +5,6 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'clave_jwt_por_defecto';
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || 10, 10);
 
-
 const generateToken = (user) => {
     return jwt.sign(
         { 
@@ -18,11 +17,7 @@ const generateToken = (user) => {
     );
 };
 
-// =======================================================
-// SERVICIO DE LOGIN
-// =======================================================
 export const loginUser = async (userIdentifier, password) => { 
-    // 1. Limpieza de datos: trim() elimina espacios accidentales
     const cleanIdentifier = userIdentifier.trim();
     const cleanPassword = password.trim();
 
@@ -35,15 +30,12 @@ export const loginUser = async (userIdentifier, password) => {
         }
     });
 
-    // 2. Validar existencia y contraseña usando el método del modelo
-
     if (!user || !(await user.validPassword(cleanPassword))) {
         const error = new Error("Credenciales inválidas. Usuario o contraseña incorrectos.");
         error.status = 401; 
         throw error;
     }
 
-    // 3. Validación de estado
     if (user.estado === false) {
         const error = new Error("Acceso denegado. Tu cuenta está inactiva o pendiente de aprobación.");
         error.status = 403; 
@@ -65,16 +57,11 @@ export const loginUser = async (userIdentifier, password) => {
     };
 };
 
-// =======================================================
-// SERVICIO DE REGISTRO
-// =======================================================
-export const registerUser = async (username, email, plainPassword) => {
-    // Limpieza de datos
+export const registerUser = async (username, email, plainPassword, selectedRolId = null) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = plainPassword.trim();
     const cleanUsername = username.trim();
     
-    // 1. Verificar si el correo ya existe
     const userExists = await db.User.findOne({ where: { email: cleanEmail } });
     if (userExists) {
         const error = new Error("El correo electrónico ya está registrado.");
@@ -82,8 +69,7 @@ export const registerUser = async (username, email, plainPassword) => {
         throw error;
     }
 
-    // 2. Lógica de Onboarding
-    let rol_id = 3;     
+    let rol_id = null;     
     let group_id = null;
     let estado = false; 
 
@@ -92,24 +78,38 @@ export const registerUser = async (username, email, plainPassword) => {
     });
 
     if (sysAdminEntry) {
-        rol_id = 1;    
+        rol_id = 1; 
         estado = true; 
     } else {
-        const groupEntry = await db.GroupWhitelist.findOne({ 
-            where: { email: cleanEmail } 
-        });
+        if (!selectedRolId) {
+            const error = new Error("Debe seleccionar un tipo de cuenta.");
+            error.status = 400;
+            error.needsRoleSelection = true; 
+            throw error;
+        }
 
-        if (groupEntry) {
-            rol_id = 3; 
-            group_id = groupEntry.group_id; 
+        rol_id = Number(selectedRolId);
+
+        if (rol_id === 2) {
             estado = true; 
+        } else if (rol_id === 3) {
+            const grupoAsociado = await db.Grupo.findOne({
+                where: {
+                    email: { [db.Op.like]: `%${cleanEmail}%` }
+                }
+            });
+
+            if (grupoAsociado) {
+                group_id = grupoAsociado.id;
+                estado = true; 
+            } else {
+                estado = false; 
+            }
         }
     }
 
-    // 3. Encriptación
     const hashedPassword = await bcrypt.hash(cleanPassword, SALT_ROUNDS);
 
-    // 4. Creación del registro
     const newUser = await db.User.create({
         username: cleanUsername,
         email: cleanEmail,
@@ -118,6 +118,19 @@ export const registerUser = async (username, email, plainPassword) => {
         group_id,
         estado
     });
+
+    // =======================================================
+    // AJUSTE PARA GROUP ADMIN (ROL 2)
+    // =======================================================
+    if (rol_id === 2) {
+        await db.Grupo.create({
+            nombre_grupo: `Grupo de ${cleanUsername}`,
+            admin_id: newUser.id,
+            // IMPORTANTE: Si la DB tiene una FK en 'email', no podemos dejarlo vacío.
+            // Lo inicializamos con el email del propio Admin para que la FK sea válida.
+            email: cleanEmail 
+        });
+    }
 
     const token = generateToken(newUser);
     

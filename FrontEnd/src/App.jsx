@@ -10,7 +10,8 @@ import Login from './components/Login';
 import Register from './components/Register';
 
 // Importa los nuevos componentes
-import AdminDashboard from './components/AdminDashboard'; 
+import AdminDashboard from './components/AdminDashboard';
+import GroupAdminDashboard from './components/GroupAdminDashboard'; 
 import WaitingRoom from './components/WaitingRoom'; 
 
 import './App.css';
@@ -28,6 +29,7 @@ function App() {
             
             {/* Rutas de Administración y Onboarding */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/group-admin" element={<GroupAdminDashboard />} />
             <Route path="/waiting-room" element={<WaitingRoom />} />
 
             {/* Rutas de la Aplicación */}

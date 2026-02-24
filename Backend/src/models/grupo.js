@@ -7,14 +7,18 @@ export default (sequelize) => {
             primaryKey: true,
             autoIncrement: true
         },
-        nombre: {
+        nombre_grupo: {
             type: DataTypes.STRING,
             allowNull: false
         },
         admin_id: {
             type: DataTypes.INTEGER,
             allowNull: true // El ID del usuario que crea el grupo
-        }
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
     }, {
         tableName: 'grupo',
         timestamps: false
