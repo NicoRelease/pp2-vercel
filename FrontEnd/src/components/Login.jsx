@@ -43,14 +43,25 @@ export default function Login() {
         localStorage.setItem('UserId', data.user.id);
         localStorage.setItem('user', JSON.stringify(data.user));
 
-        if (data.user.rol_id === 1) {
-            navigate("/admin-dashboard");
-        } else if (data.user.estado === false) {
-            navigate("/waiting-room");
-        } else {
-            navigate("/gestor-estudio");
-        }
-      } else {
+        const { rol_id, estado } = data.user;
+
+        if (estado === false) {
+        navigate("/waiting-room");
+    } 
+    else if (rol_id === 1) {
+        navigate("/admin-dashboard");
+    } 
+    else if (rol_id === 2) {
+        navigate("/group-admin");
+    } 
+    else if (rol_id === 3) {
+        navigate("/gestor-estudio");
+    } 
+    else {
+        navigate("/waiting-room");
+    }
+}
+       else {
         setErrorMessage(data.error || "Credenciales incorrectas.");
       }
     } catch (err) {

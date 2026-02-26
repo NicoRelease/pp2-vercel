@@ -8,12 +8,7 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET;
 
 
-/**
- * Middleware para proteger rutas.
- * Verifica el token JWT enviado en el header de autorización.
- * * NOTA: Esta versión NO hace una llamada a la base de datos para verificar 
- * la existencia del usuario, solo verifica que el token sea válido.
- */
+
 export const protect = async (req, res, next) => {
     // 1. Obtener el token del encabezado (Header)
     let token;

@@ -17,7 +17,8 @@ export default (sequelize) => {
         },
         email: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true,
+            unique: false
         },
     }, {
         tableName: 'grupo',

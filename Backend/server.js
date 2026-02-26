@@ -2,6 +2,7 @@
 import cors from 'cors';
 import authRouter from './src/routes/authroutes.js';
 import sesionesRouter from './src/routes/sesiones.routes.js';
+import groupRoutes from './src/routes/groupRoutes.js';
 
 import express from 'express';
 
@@ -25,6 +26,7 @@ app.get('backend/prueba', (req, res) => {
 
 app.use('/backend', authRouter); 
 app.use('/backend/sesiones', sesionesRouter);
+app.use('/backend/groups', groupRoutes);
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     app.listen(3000, () => {
