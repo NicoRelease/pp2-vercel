@@ -10,7 +10,7 @@ import TareaModel from './Tarea.js';
 import RolModel from './rol.js';
 import GrupoModel from './grupo.js';
 import WhitelistModel from './whitelist.js';
-import GroupWhitelistModel from './groupwhitelist.js';
+import GrupoListaModel from './grupo_lista.js'; // Nueva tabla para los integrantes de cada grupo
 
 // Importar la función de asociaciones
 import defineAssociations from './associations.js';
@@ -21,7 +21,7 @@ const db = {};
 db.Rol = RolModel(sequelize);
 db.Grupo = GrupoModel(sequelize);
 db.Whitelist = WhitelistModel(sequelize); // Whitelist Global (SysAdmins)
-db.GroupWhitelist = GroupWhitelistModel(sequelize); // Whitelist por Grupo
+db.GrupoLista = GrupoListaModel(sequelize); // Tabla para los integrantes de cada grupo (emails)
 
 // 2. Inicializar Modelos de Negocio
 db.User = UserModel(sequelize);

@@ -18,7 +18,7 @@ export default function GroupAdminDashboard() {
     // Cargar todos los grupos del Admin al iniciar
     const cargarGrupos = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/groups/all`, { // Ajusta a tu nueva ruta de "listar"
+            const response = await fetch(`${API_BASE_URL}/groups/all`, { 
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -30,20 +30,30 @@ export default function GroupAdminDashboard() {
 
     useEffect(() => { cargarGrupos(); }, []);
 
-    // Al seleccionar un grupo de la lista
-    const seleccionarGrupo = (grupo) => {
-        setIdSeleccionada(grupo.id);
-        setNombreGrupo(grupo.nombre_grupo);
-        setListaEmails(grupo.email ? grupo.email.split(',').filter(e => e !== "") : []);
-    };
-
-    // Limpiar para crear uno nuevo
+    // Función para preparar nuevo grupo
     const prepararNuevoGrupo = () => {
         setIdSeleccionada(null);
         setNombreGrupo('');
         setListaEmails([]);
     };
 
+    // Al seleccionar un grupo de la lista
+    const seleccionarGrupo = (grupo) => {
+        setIdSeleccionada(grupo.id);
+        setNombreGrupo(grupo.nombre_grupo);
+        
+        // Cargar los emails asociados al grupo
+        if (grupo.emails && Array.isArray(grupo.emails)) {
+            setListaEmails(grupo.emails);
+        } else if (grupo.email) {
+            // Para compatibilidad con datos antiguos
+            setListaEmails(grupo.email.split(',').filter(e => e !== ""));
+        } else {
+            setListaEmails([]);
+        }
+    };
+
+    // En el formulario de emails, se mantiene igual:
     const agregarEmail = (e) => {
         e.preventDefault();
         const email = emailIntegrante.trim().toLowerCase();
@@ -53,6 +63,7 @@ export default function GroupAdminDashboard() {
         }
     };
 
+    // Al guardar cambios:
     const guardarCambios = async () => {
         setLoading(true);
         try {
@@ -63,14 +74,14 @@ export default function GroupAdminDashboard() {
                     'Authorization': `Bearer ${token}` 
                 },
                 body: JSON.stringify({
-                    id: idSeleccionada, // Si es null, el back debería crear uno nuevo
+                    id: idSeleccionada,
                     nombre_grupo: nombreGrupo,
-                    emails: listaEmails.join(',')
+                    emails: listaEmails // Ahora se envían los emails correctamente
                 }),
             });
             if (response.ok) {
                 alert('¡Guardado con éxito!');
-                cargarGrupos(); // Recargar la lista
+                cargarGrupos();
                 if (!idSeleccionada) prepararNuevoGrupo();
             }
         } catch (error) {
@@ -89,7 +100,7 @@ export default function GroupAdminDashboard() {
                 <div className="w-full md:w-1/3 bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-gray-700">Mis Grupos</h3>
-                        <button onClick={prepararNuevoGrupo} className="text-xs bg-blue-500 text-white px-2 py-1 rounded-lg">+ Nuevo</button>
+                        <button onClick={prepararNuevoGrupo} className="text-xs bg-blue-500 text-black px-2 py-1 rounded-lg">+ Nuevo</button>
                     </div>
                     <div className="space-y-2">
                         {grupos.map(g => (
@@ -100,8 +111,8 @@ export default function GroupAdminDashboard() {
                             >
                                 <p className="font-semibold text-sm truncate">{g.nombre_grupo || 'Sin nombre'}</p>
                                 <p className={`text-xs ${idSeleccionada === g.id ? 'text-blue-100' : 'text-gray-400'}`}>
-                                    {g.email ? g.email.split(',').length : 0} integrantes
-                                </p>
+    {g.emails ? g.emails.length : 0} integrantes
+</p>
                             </div>
                         ))}
                     </div>
@@ -135,7 +146,7 @@ export default function GroupAdminDashboard() {
                                     onChange={(e) => setEmailIntegrante(e.target.value)} 
                                     placeholder="correo@ejemplo.com"
                                 />
-                                <button onClick={agregarEmail} className="bg-gray-800 text-white px-4 rounded-lg font-bold hover:bg-black">Add</button>
+                                <button onClick={agregarEmail} className="bg-gray-800 text-black px-4 rounded-lg font-bold hover:bg-black">Add</button>
                             </div>
                         </div>
 
@@ -154,7 +165,7 @@ export default function GroupAdminDashboard() {
                         <button 
                             onClick={guardarCambios} 
                             disabled={loading}
-                            className={`w-full py-3 rounded-xl font-bold text-white transition-all ${idSeleccionada ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'}`}
+                            className={`w-full py-3 rounded-xl font-bold text-black transition-all ${idSeleccionada ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'}`}
                         >
                             {loading ? 'Procesando...' : idSeleccionada ? 'Actualizar Cambios' : 'Registrar Grupo'}
                         </button>

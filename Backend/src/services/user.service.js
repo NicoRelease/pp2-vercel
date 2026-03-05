@@ -1,34 +1,44 @@
+// Backend/src/services/user.service.js
+
 import db from '../models/index.js';
 
-// Listar todos los usuarios para el Panel de Administración
+// Obtener todos los usuarios
 export const getAllUsers = async () => {
     return await db.User.findAll({
         attributes: ['id', 'username', 'email', 'estado', 'rol_id', 'group_id'],
         include: [
             { model: db.Rol, as: 'rol', attributes: ['nombre'] },
-            { model: db.Grupo, as: 'grupo', attributes: ['nombre'] }
+            { model: db.Grupo, as: 'grupo', attributes: ['nombre_grupo'] } // Cambiado a nombre_grupo
         ]
     });
 };
 
-// Activar o desactivar un usuario manualmente
+// Editar un usuario
+export const updateUser = async (userId, userData) => {
+    const user = await db.User.findByPk(userId);
+    if (!user) throw new Error("Usuario no encontrado");
+
+    // Actualiza los campos del usuario
+    Object.assign(user, userData);
+    await user.save();
+    return user;
+};
+
+// Activar o desactivar un usuario
 export const toggleUserStatus = async (userId, status) => {
     const user = await db.User.findByPk(userId);
     if (!user) throw new Error("Usuario no encontrado");
-    
+
     user.estado = status;
     await user.save();
     return user;
 };
 
-// Asignar un usuario a un grupo y cambiar su rol a GroupAdmin si es necesario
-export const assignUserToGroup = async (userId, groupId, roleId = 3) => {
+// Eliminar un usuario
+export const deleteUser = async (userId) => {
     const user = await db.User.findByPk(userId);
     if (!user) throw new Error("Usuario no encontrado");
 
-    user.group_id = groupId;
-    user.rol_id = roleId;
-    user.estado = true; // Al asignarlo a un grupo, lo activamos automáticamente
-    await user.save();
-    return user;
+    await user.destroy();
+    return { message: 'Usuario eliminado correctamente' };
 };

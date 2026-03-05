@@ -1,3 +1,4 @@
+// Backend/src/models/grupo.js
 import { DataTypes } from 'sequelize';
 
 export default (sequelize) => {
@@ -13,13 +14,8 @@ export default (sequelize) => {
         },
         admin_id: {
             type: DataTypes.INTEGER,
-            allowNull: true // El ID del usuario que crea el grupo
-        },
-        email: {
-            type: DataTypes.STRING,
-            allowNull: true,
-            unique: false
-        },
+            allowNull: false
+        }
     }, {
         tableName: 'grupo',
         timestamps: false

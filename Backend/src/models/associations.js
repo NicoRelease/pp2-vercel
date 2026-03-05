@@ -6,7 +6,7 @@
  */
 function defineAssociations(models) {
  
-    const { User, Sesion, Tarea } = models;
+    const { User, Sesion, Tarea, Rol, Grupo } = models;
 
     // ====================================================================
     // 1. RELACIÓN USER (1) -> SESION (N)
@@ -46,6 +46,27 @@ function defineAssociations(models) {
         as: 'sesion', 
     });
 
+    // ====================================================================
+    // 3. RELACIÓN USER (1) -> ROL (1)
+    // Clave foránea: 'rol_id'
+    // ====================================================================
+
+    // Un Usuario pertenece a un Rol
+    User.belongsTo(Rol, {
+        foreignKey: 'rol_id',
+        as: 'rol'
+    });
+
+    // ====================================================================
+    // 4. RELACIÓN USER (1) -> GRUPO (1)
+    // Clave foránea: 'group_id'
+    // ====================================================================
+
+    // Un Usuario pertenece a un Grupo
+    User.belongsTo(Grupo, {
+        foreignKey: 'group_id',
+        as: 'grupo'
+    });
 }
 
 export default defineAssociations;
