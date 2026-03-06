@@ -6,7 +6,7 @@
  */
 function defineAssociations(models) {
  
-    const { User, Sesion, Tarea, Rol, Grupo } = models;
+    const { User, Sesion, Tarea, Rol, Grupo, GrupoLista } = models;
 
     // ====================================================================
     // 1. RELACIÓN USER (1) -> SESION (N)
@@ -66,6 +66,24 @@ function defineAssociations(models) {
     User.belongsTo(Grupo, {
         foreignKey: 'group_id',
         as: 'grupo'
+    });
+
+    // ====================================================================
+    // 5. RELACIÓN GRUPO (1) -> GRUPO_LISTA (N)
+    // Clave foránea: 'grupo_id'
+    // ====================================================================
+
+    // Un Grupo tiene muchos integrantes (emails)
+    Grupo.hasMany(GrupoLista, {
+        foreignKey: 'grupo_id',
+        as: 'emails', // Alias para el include
+        onDelete: 'CASCADE',
+    });
+
+    // Un Integrante (email) pertenece a un Grupo
+    GrupoLista.belongsTo(Grupo, {
+        foreignKey: 'grupo_id',
+        as: 'grupo',
     });
 }
 

@@ -1,16 +1,30 @@
 import db from '../models/index.js';
 
-// Backend/src/controllers/group.controller.js
-
 // 1. OBTENER TODOS LOS GRUPOS (Para el listado de la izquierda)
 export const getAllMyGroups = async (req, res) => {
     try {
         const admin_id = req.user.id;
         const grupos = await db.Grupo.findAll({ 
             where: { admin_id: admin_id },
-            order: [['created_at', 'DESC']]
+            order: [['created_at', 'DESC']],
+            include: [{
+                model: db.GrupoLista,
+                attributes: ['email', 'grupo_id'],
+                as: 'emails'
+            }]
         });
-        res.status(200).json(grupos);
+        
+        // Procesar los resultados para incluir los emails en formato adecuado
+        const gruposConEmails = grupos.map(grupo => {
+            const grupoData = grupo.toJSON();
+            const emails = grupoData.emails ? grupoData.emails.map(emailObj => emailObj.email) : [];
+            return {
+                ...grupoData,
+                emails: emails // Añadir el campo emails como array
+            };
+        });
+        
+        res.status(200).json(gruposConEmails);
     } catch (error) {
         console.error("Error al listar grupos:", error);
         res.status(500).json({ message: "Error al obtener la lista de grupos" });
@@ -70,18 +84,23 @@ export const manageGroup = async (req, res) => {
 export const getMyGroup = async (req, res) => {
     try {
         const { id } = req.params;
-        const grupo = await db.Grupo.findOne({ where: { id: id, admin_id: req.user.id } });
-        if (!grupo) return res.status(404).json({ message: "Grupo no encontrado" });
-        
-        // Obtener los emails asociados
-        const emails = await db.GrupoLista.findAll({ 
-            where: { grupo_id: id },
-            attributes: ['email']
+        const grupo = await db.Grupo.findOne({ 
+            where: { id: id, admin_id: req.user.id },
+            include: [{
+                model: db.GrupoLista,
+                attributes: ['email', 'grupo_id'],
+                as: 'emails'
+            }]
         });
         
+        if (!grupo) return res.status(404).json({ message: "Grupo no encontrado" });
+        
+        const grupoData = grupo.toJSON();
+        const emails = grupoData.emails ? grupoData.emails.map(emailObj => emailObj.email) : [];
+        
         res.status(200).json({
-            ...grupo.dataValues,
-            emails: emails.map(e => e.email)
+            ...grupoData,
+            emails: emails
         });
     } catch (error) {
         res.status(500).json({ message: "Error al obtener el detalle del grupo" });
