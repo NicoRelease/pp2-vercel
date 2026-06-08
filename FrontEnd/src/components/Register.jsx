@@ -109,7 +109,7 @@ export default function Register() {
                         </div>
                     )}
 
-                    <button type="submit" className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold mt-6">
+                    <button type="submit" className="RegisterButton">
                         {loading ? 'Procesando...' : (showRoleSelector ? 'Confirmar y Registrar' : 'Registrar Cuenta')}
                     </button>
                 </form>

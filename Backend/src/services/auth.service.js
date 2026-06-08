@@ -93,14 +93,14 @@ export const registerUser = async (username, email, plainPassword, selectedRolId
         if (rol_id === 2) {
             estado = true; 
         } else if (rol_id === 3) {
-            const grupoAsociado = await db.Grupo.findOne({
+            const grupoAsociado = await db.GrupoLista.findOne({
                 where: {
                     email: { [db.Op.like]: `%${cleanEmail}%` }
                 }
             });
 
             if (grupoAsociado) {
-                group_id = grupoAsociado.id;
+                group_id = grupoAsociado.grupo_id;
                 estado = true; 
             } else {
                 estado = false; 
@@ -136,7 +136,7 @@ export const registerUser = async (username, email, plainPassword, selectedRolId
     
     return { 
         user: { 
-            id: newUser.id, 
+             
             username: newUser.username, 
             email: newUser.email,
             rol_id: newUser.rol_id,
