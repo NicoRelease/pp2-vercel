@@ -46,22 +46,22 @@ export default function Login() {
         const { rol_id, estado } = data.user;
 
         if (estado === false) {
-        navigate("/waiting-room");
-    } 
-    else if (rol_id === 1) {
-        navigate("/admin-dashboard");
-    } 
-    else if (rol_id === 2) {
-        navigate("/group-admin");
-    } 
-    else if (rol_id === 3) {
-        navigate("/gestor-estudio");
-    } 
-    else {
-        navigate("/waiting-room");
-    }
-}
-       else {
+          navigate("/waiting-room");
+        } 
+        else if (rol_id === 1) {
+          navigate("/admin-dashboard");
+        } 
+        else if (rol_id === 2) {
+          navigate("/group-admin");
+        } 
+        else if (rol_id === 3) {
+          navigate("/gestor-estudio");
+        } 
+        else {
+          navigate("/waiting-room");
+        }
+      } 
+      else {
         setErrorMessage(data.error || "Credenciales incorrectas.");
       }
     } catch (err) {
@@ -93,9 +93,45 @@ export default function Login() {
               <input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required disabled={isLoading} />
             </div>
           </div>
-          <button type="submit" className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold mt-4" disabled={isLoading}>
-            {isLoading ? "Validando..." : "Iniciar sesión"}
+          
+          {/* Botón con texto negro para mejor contraste */}
+          <button 
+            type="submit" 
+            className={`w-full py-3 bg-blue-600 text-black rounded-xl font-bold mt-4 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+            disabled={isLoading}
+          >
+            {isLoading 
+              ? "Validando..." 
+              : (
+                <>
+                  Iniciar sesión
+                  <span className="inline-block ml-2 animate-pulse">→</span>
+                </>
+              )
+            }
+            
+            {/* Efectos hover y focus para mejor accesibilidad */}
+          >
+            {isLoading ? "Validando..." : (
+              <>Iniciar sesión<span className="ml-1 inline-block animate-bounce">➜</span></>
+            )}
           </button>
+
+          <style jsx>{`
+            button[type='submit']::after {
+              content: '';
+              position: absolute;
+              top: 0; left: -5px; right: -5px; bottom: 0;
+              background-color: rgba(255, 255, 255, 0.1);
+              border-radius: inherit;
+              transform: scaleX(0);
+              transition: transform .3s ease-in-out;
+            }
+
+            button[type='submit']:hover::after {
+              transform: scaleX(1);
+            }
+          `}</style>
 
           {/* PARTE RESTAURADA: Enlace de Registro */}
           <div className="mt-6 text-center">
