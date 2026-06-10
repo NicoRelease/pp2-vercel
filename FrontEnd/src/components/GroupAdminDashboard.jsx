@@ -12,61 +12,121 @@ export default function GroupAdminDashboard() {
     const [listaEmails, setListaEmails] = useState([]);
     
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const API_BASE_URL = import.meta.env.VITE_API_URL;
     const token = localStorage.getItem('authToken');
 
     // Cargar todos los grupos del Admin al iniciar
     const cargarGrupos = async () => {
         try {
+            if (!token) {
+                throw new Error('No se encontró token de autenticación');
+            }
+            
             const response = await fetch(`${API_BASE_URL}/groups/all`, { 
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error ${response.status}`);
+            }
+            
             const data = await response.json();
-            if (response.ok) setGrupos(Array.isArray(data) ? data : [data]);
+            setGrupos(Array.isArray(data) ? data : [data]);
+            setError(null);
         } catch (error) {
             console.error("Error cargando grupos:", error);
+            setError('Error al cargar la lista de grupos. Por favor, intente nuevamente.');
         }
     };
 
-    useEffect(() => { cargarGrupos(); }, []);
+    useEffect(() => { 
+        if (token) {
+            cargarGrupos(); 
+        } else {
+            setError('No se encontró token de autenticación. Por favor, inicie sesión.');
+        }
+    }, [token]);
 
     // Función para preparar nuevo grupo
     const prepararNuevoGrupo = () => {
         setIdSeleccionada(null);
         setNombreGrupo('');
         setListaEmails([]);
+        setError(null);
     };
 
     // Al seleccionar un grupo de la lista
     const seleccionarGrupo = (grupo) => {
-        setIdSeleccionada(grupo.id);
-        setNombreGrupo(grupo.nombre_grupo);
-        
-        // Cargar los emails asociados al grupo
-        if (grupo.emails && Array.isArray(grupo.emails)) {
-            setListaEmails(grupo.emails);
-        } else if (grupo.email) {
-            // Para compatibilidad con datos antiguos
-            setListaEmails(grupo.email.split(',').filter(e => e !== ""));
-        } else {
-            setListaEmails([]);
+        try {
+            setIdSeleccionada(grupo.id);
+            setNombreGrupo(grupo.nombre_grupo);
+            
+            // Cargar los emails asociados al grupo
+            if (grupo.emails && Array.isArray(grupo.emails)) {
+                setListaEmails(grupo.emails);
+            } else if (grupo.email) {
+                // Para compatibilidad con datos antiguos
+                setListaEmails(grupo.email.split(',').filter(e => e !== ""));
+            } else {
+                setListaEmails([]);
+            }
+            setError(null);
+        } catch (error) {
+            console.error("Error seleccionando grupo:", error);
+            setError('Error al cargar los detalles del grupo');
         }
     };
 
     // En el formulario de emails, se mantiene igual:
     const agregarEmail = (e) => {
         e.preventDefault();
-        const email = emailIntegrante.trim().toLowerCase();
-        if (email && !listaEmails.includes(email)) {
+        try {
+            const email = emailIntegrante.trim().toLowerCase();
+            
+            if (!email) {
+                setError('Por favor, ingrese un correo electrónico');
+                return;
+            }
+            
+            if (!/\S+@\S+\.\S+/.test(email)) {
+                setError('Por favor, ingrese un correo electrónico válido');
+                return;
+            }
+            
+            if (listaEmails.includes(email)) {
+                setError('Este correo ya ha sido agregado');
+                return;
+            }
+            
             setListaEmails([...listaEmails, email]);
             setEmailIntegrante('');
+            setError(null);
+        } catch (error) {
+            console.error("Error agregando email:", error);
+            setError('Error al agregar el correo electrónico');
         }
     };
 
     // Al guardar cambios:
     const guardarCambios = async () => {
         setLoading(true);
+        setError(null);
+        
         try {
+            if (!token) {
+                throw new Error('No se encontró token de autenticación');
+            }
+            
+            if (!nombreGrupo.trim()) {
+                throw new Error('Por favor, ingrese un nombre para el grupo');
+            }
+            
             const response = await fetch(`${API_BASE_URL}/groups/manage`, {
                 method: 'POST',
                 headers: { 
@@ -75,60 +135,152 @@ export default function GroupAdminDashboard() {
                 },
                 body: JSON.stringify({
                     id: idSeleccionada,
-                    nombre_grupo: nombreGrupo,
-                    emails: listaEmails // Ahora se envían los emails correctamente
+                    nombre_grupo: nombreGrupo.trim(),
+                    emails: listaEmails
                 }),
             });
-            if (response.ok) {
-                alert('¡Guardado con éxito!');
-                cargarGrupos();
-                if (!idSeleccionada) prepararNuevoGrupo();
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error ${response.status}`);
             }
+            
+            const result = await response.json();
+            alert('¡Guardado con éxito!');
+            cargarGrupos();
+            if (!idSeleccionada) prepararNuevoGrupo();
         } catch (error) {
-            alert('Error al sincronizar');
+            console.error("Error guardando cambios:", error);
+            setError(error.message || 'Error al guardar los cambios. Por favor, intente nuevamente.');
         } finally {
             setLoading(false);
         }
     };
 
+    // Eliminar grupo
+    const eliminarGrupo = async (id) => {
+        if (!token) {
+            setError('No se encontró token de autenticación');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const response = await fetch(`${API_BASE_URL}/groups/delete/${id}`, {
+                method: 'DELETE',
+                headers: { 
+                    'Authorization': `Bearer ${token}` 
+                }
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Error ${response.status}`);
+            }
+            
+            // Eliminar el grupo de la lista local
+            setGrupos(grupos.filter(grupo => grupo.id !== id));
+            
+            // Si el grupo eliminado era el seleccionado, limpiar selección
+            if (idSeleccionada === id) {
+                prepararNuevoGrupo();
+            }
+            
+            alert('¡Grupo eliminado con éxito!');
+            setError(null);
+        } catch (error) {
+            console.error("Error eliminando grupo:", error);
+            setError(error.message || 'Error al eliminar el grupo. Por favor, intente nuevamente.');
+        } finally {
+            setLoading(false);
+            setConfirmDeleteId(null);
+        }
+    };
+
+    // Mostrar confirmación de eliminación
+    const mostrarConfirmacionEliminar = (id) => {
+        setConfirmDeleteId(id);
+    };
+
+    // Cancelar confirmación de eliminación
+    const cancelarEliminacion = () => {
+        setConfirmDeleteId(null);
+    };
+
     return (
-        <div className="Tarjeta-Principal" style={{ maxWidth: '900px' }}>
+        <div className="Tarjeta-Principal">
             <HeaderNoLink />
-            <div className="flex flex-col md:flex-row gap-6 p-4">
+            <div className="group-dashboard-container">
                 
                 {/* COLUMNA IZQUIERDA: Listado (Sidebar) */}
-                <div className="w-full md:w-1/3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-gray-700">Mis Grupos</h3>
-                        <button onClick={prepararNuevoGrupo} className="text-xs bg-blue-500 text-black px-2 py-1 rounded-lg">+ Nuevo</button>
+                <div className="group-sidebar">
+                    <div className="group-sidebar-header">
+                        <h3 className="group-sidebar-title">Mis Grupos</h3>
+                        <button onClick={prepararNuevoGrupo} className="new-group-btn">+ Nuevo</button>
                     </div>
-                    <div className="space-y-2">
+                    <div className="group-list">
                         {grupos.map(g => (
                             <div 
                                 key={g.id} 
                                 onClick={() => seleccionarGrupo(g)}
-                                className={`p-3 rounded-lg cursor-pointer transition-all ${idSeleccionada === g.id ? 'bg-blue-600 text-white shadow-md' : 'bg-white hover:bg-blue-50 border border-gray-100'}`}
+                                className={`group-item ${idSeleccionada === g.id ? 'selected' : ''}`}
                             >
-                                <p className="font-semibold text-sm truncate">{g.nombre_grupo || 'Sin nombre'}</p>
-                                <p className={`text-xs ${idSeleccionada === g.id ? 'text-blue-100' : 'text-gray-400'}`}>
-    {g.emails ? g.emails.length : 0} integrantes
-</p>
+                                <div className="group-item-content">
+                                    <p className="group-item-title">{g.nombre_grupo || 'Sin nombre'}</p>
+                                    <p className="group-item-meta">{g.emails ? g.emails.length : 0} integrantes</p>
+                                </div>
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        mostrarConfirmacionEliminar(g.id);
+                                    }}
+                                    className="group-delete-btn"
+                                    title="Eliminar grupo"
+                                >
+                                    🗑️
+                                </button>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* COLUMNA DERECHA: Editor / Creador */}
-                <div className="flex-1 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <h2 className="text-xl font-bold mb-6 text-gray-800">
+                <div className="group-editor">
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+                            {error}
+                        </div>
+                    )}
+                    
+                    {confirmDeleteId && (
+                        <div className="mb-4 p-3 bg-yellow-50 text-yellow-700 rounded-lg text-sm delete-confirmation">
+                            <p>¿Está seguro que desea eliminar este grupo?</p>
+                            <div className="flex gap-2 mt-2 delete-confirmation-buttons">
+                                <button 
+                                    onClick={() => eliminarGrupo(confirmDeleteId)}
+                                    className="px-3 py-1 bg-red-600 text-white rounded text-sm delete-confirm-btn"
+                                >
+                                    Sí, Eliminar
+                                </button>
+                                <button 
+                                    onClick={cancelarEliminacion}
+                                    className="px-3 py-1 bg-gray-500 text-white rounded text-sm delete-cancel-btn"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    
+                    <h2 className="group-editor-title">
                         {idSeleccionada ? `Editando: ${nombreGrupo}` : 'Crear Nuevo Grupo'}
                     </h2>
                     
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Grupo</label>
+                        <div className="form-section">
+                            <label className="form-label">Nombre del Grupo</label>
                             <input 
-                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="input-field"
                                 type="text" 
                                 value={nombreGrupo} 
                                 onChange={(e) => setNombreGrupo(e.target.value)} 
@@ -136,36 +288,39 @@ export default function GroupAdminDashboard() {
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Agregar Integrante</label>
-                            <div className="flex gap-2">
+                        <div className="form-section">
+                            <label className="form-label">Agregar Integrante</label>
+                            <div className="email-input-container">
                                 <input 
-                                    className="flex-1 p-2 border border-gray-300 rounded-lg outline-none"
+                                    className="email-input"
                                     type="email" 
                                     value={emailIntegrante} 
                                     onChange={(e) => setEmailIntegrante(e.target.value)} 
                                     placeholder="correo@ejemplo.com"
                                 />
-                                <button onClick={agregarEmail} className="bg-gray-800 text-black px-4 rounded-lg font-bold hover:bg-black">Add</button>
+                                <button onClick={agregarEmail} className="add-email-btn">Add</button>
                             </div>
                         </div>
 
-                        <div className="bg-gray-50 p-4 rounded-lg min-h-[100px]">
-                            <p className="text-xs font-bold text-gray-400 uppercase mb-2">Lista de Integrantes</p>
-                            <div className="flex flex-wrap gap-2">
-                                {listaEmails.map(email => (
-                                    <span key={email} className="bg-white border border-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2 shadow-sm">
-                                        {email}
-                                        <button onClick={() => setListaEmails(listaEmails.filter(e => e !== email))} className="text-red-500 hover:text-red-700">×</button>
-                                    </span>
-                                ))}
+                        <div className="form-section">
+                            <label className="form-label">Lista de Integrantes</label>
+                            <div className="email-tags-container">
+                                <p className="email-tags-title">Integrantes del grupo</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {listaEmails.map(email => (
+                                        <span key={email} className="email-tag">
+                                            {email}
+                                            <button onClick={() => setListaEmails(listaEmails.filter(e => e !== email))} className="email-tag-remove">×</button>
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
                         <button 
                             onClick={guardarCambios} 
                             disabled={loading}
-                            className={`w-full py-3 rounded-xl font-bold text-black transition-all ${idSeleccionada ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'}`}
+                            className={`w-full py-3 rounded-xl font-bold text-black transition-all save-btn ${idSeleccionada ? 'updating' : 'creating'}`}
                         >
                             {loading ? 'Procesando...' : idSeleccionada ? 'Actualizar Cambios' : 'Registrar Grupo'}
                         </button>

@@ -1,5 +1,3 @@
-// FrontEnd/src/components/AdminDashboard.jsx
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -118,16 +116,16 @@ const AdminDashboard = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-xl">Cargando datos...</div>
+                <div className="admin-dashboard-loading">Cargando datos...</div>
             </div>
         );
     }
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <header className="bg-slate-900 text-white p-4 flex justify-between items-center shadow-md">
+            <header className="admin-dashboard-header">
                 <div className="flex items-center gap-6">
-                    <span className="font-bold text-lg tracking-tight">ADMIN | Optimizador</span>
+                    <span className="admin-dashboard-title">ADMIN | Optimizador</span>
                     <button onClick={() => navigate('/')} className="text-sm hover:text-blue-400 transition">Ir al Inicio</button>
                 </div>
                 <button 
@@ -135,42 +133,42 @@ const AdminDashboard = () => {
                         localStorage.removeItem('authToken'); 
                         navigate('/login'); 
                     }} 
-                    className="text-sm bg-red-600 hover:bg-red-700 py-2 px-4 rounded"
+                    className="admin-dashboard-logout-btn"
                 >
                     Cerrar Sesión
                 </button>
             </header>
 
-            <main className="max-w-7xl mx-auto p-6">
+            <main className="admin-dashboard-content">
                 <h2 className="text-2xl font-bold mb-6 text-gray-800">Gestión de Usuarios</h2>
                 
-                <div className="bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200">
-                    <table className="w-full text-left">
-                        <thead className="bg-gray-100 border-b border-gray-200">
+                <div className="admin-dashboard-table-container">
+                    <table className="admin-dashboard-table">
+                        <thead className="admin-dashboard-table-header">
                             <tr>
-                                <th className="p-4 text-xs font-semibold uppercase text-gray-500">Username</th>
-                                <th className="p-4 text-xs font-semibold uppercase text-gray-500">Email</th>
-                                <th className="p-4 text-xs font-semibold uppercase text-gray-500">Creado el</th>
-                                <th className="p-4 text-xs font-semibold uppercase text-gray-500">Rol</th>
-                                <th className="p-4 text-xs font-semibold uppercase text-gray-500">Grupo</th>
-                                <th className="p-4 text-xs font-semibold uppercase text-gray-500">Estado</th>
-                                <th className="p-4 text-xs font-semibold uppercase text-gray-500">Acciones</th>
+                                <th className="admin-dashboard-table-header-cell">Username</th>
+                                <th className="admin-dashboard-table-header-cell">Email</th>
+                                <th className="admin-dashboard-table-header-cell">Creado el</th>
+                                <th className="admin-dashboard-table-header-cell">Rol</th>
+                                <th className="admin-dashboard-table-header-cell">Grupo</th>
+                                <th className="admin-dashboard-table-header-cell">Estado</th>
+                                <th className="admin-dashboard-table-header-cell">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody>
                             {users.map(user => (
-                                <tr key={user.id} className="hover:bg-blue-50/50 transition">
-                                    <td className="p-4 font-medium text-gray-700">{user.username}</td>
-                                    <td className="p-4 text-gray-600">{user.email}</td>
-                                    <td className="p-4 text-sm text-gray-500">
+                                <tr key={user.id} className="admin-dashboard-table-row">
+                                    <td className="admin-dashboard-table-cell">{user.username}</td>
+                                    <td className="admin-dashboard-table-cell">{user.email}</td>
+                                    <td className="admin-dashboard-table-cell">
                                         {new Date(user.created_at).toLocaleDateString()}
                                     </td>
-                                    <td className="p-4">
-                                        <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs uppercase font-bold">
+                                    <td className="admin-dashboard-table-cell">
+                                        <span className="admin-dashboard-user-role">
                                             {user.rol?.nombre}
                                         </span>
                                     </td>
-                                    <td className="p-4">
+                                    <td className="admin-dashboard-table-cell">
                                         {editingUser?.id === user.id ? (
                                             <select 
                                                 value={editForm.group_id} 
@@ -183,16 +181,18 @@ const AdminDashboard = () => {
                                                 ))}
                                             </select>
                                         ) : (
-                                            user.grupo?.nombre || 'Sin grupo'
+                                            <span className="admin-dashboard-user-group">
+                                                {user.grupo?.nombre || 'Sin grupo'}
+                                            </span>
                                         )}
                                     </td>
-                                    <td className="p-4">
+                                    <td className="admin-dashboard-table-cell">
                                         {editingUser?.id === user.id ? (
                                             <input 
                                                 type="checkbox" 
                                                 checked={editForm.estado} 
                                                 onChange={(e) => setEditForm({...editForm, estado: e.target.checked})}
-                                                className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                                className="admin-dashboard-checkbox"
                                             />
                                         ) : (
                                             <div className="flex items-center justify-center">
@@ -200,38 +200,38 @@ const AdminDashboard = () => {
                                                     type="checkbox" 
                                                     checked={user.estado} 
                                                     onChange={(e) => handleUpdate(user.id, 'estado', e.target.checked)}
-                                                    className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                                                    className="admin-dashboard-checkbox"
                                                 />
                                             </div>
                                         )}
                                     </td>
-                                    <td className="p-4">
+                                    <td className="admin-dashboard-table-cell">
                                         {editingUser?.id === user.id ? (
-                                            <div className="flex gap-2">
+                                            <div className="admin-dashboard-actions">
                                                 <button 
                                                     onClick={saveEdit}
-                                                    className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                                                    className="admin-dashboard-action-btn admin-dashboard-save-btn"
                                                 >
                                                     Guardar
                                                 </button>
                                                 <button 
                                                     onClick={cancelEdit}
-                                                    className="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600"
+                                                    className="admin-dashboard-action-btn admin-dashboard-cancel-btn"
                                                 >
                                                     Cancelar
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div className="flex gap-2">
+                                            <div className="admin-dashboard-actions">
                                                 <button 
                                                     onClick={() => startEditing(user)}
-                                                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                                                    className="admin-dashboard-action-btn admin-dashboard-edit-btn"
                                                 >
                                                     Editar
                                                 </button>
                                                 <button 
                                                     onClick={() => deleteUser(user.id)}
-                                                    className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                                                    className="admin-dashboard-action-btn admin-dashboard-delete-btn"
                                                 >
                                                     Eliminar
                                                 </button>

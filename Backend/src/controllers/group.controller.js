@@ -2,6 +2,7 @@ import db from '../models/index.js';
 
 // 1. OBTENER TODOS LOS GRUPOS (Para el listado de la izquierda)
 export const getAllMyGroups = async (req, res) => {
+    console.log("Usuario autenticado:", req.user); // Verificar que req.user esté presente
     try {
         const admin_id = req.user.id;
         const grupos = await db.Grupo.findAll({ 
@@ -33,6 +34,7 @@ export const getAllMyGroups = async (req, res) => {
 
 // 2. CREAR O ACTUALIZAR
 export const manageGroup = async (req, res) => {
+    console.log("Datos recibidos en manageGroup:", req.body, req.user.id); // Verificar datos recibidos
     try {
         const { id, nombre_grupo, emails } = req.body;
         const admin_id = req.user.id;
@@ -47,12 +49,18 @@ export const manageGroup = async (req, res) => {
             
             // Actualizar lista de emails
             await db.GrupoLista.destroy({ where: { grupo_id: id } });
+            
             if (emails && emails.length > 0) {
-                const emailList = emails.map(email => ({
-                    email: email.trim().toLowerCase(),
-                    grupo_id: id
-                }));
-                await db.GrupoLista.bulkCreate(emailList);
+                try {
+                    const emailList = emails.map(email => ({
+                        email: email.trim().toLowerCase(),
+                        grupo_id: id
+                    }));
+                    await db.GrupoLista.bulkCreate(emailList);
+                } catch (error) {
+                    console.error("Error al actualizar emails del grupo:", error);
+                    return res.status(500).json({ message: "Error al actualizar los emails del grupo. Posiblemente exista algún correo duplicado." });
+                }
             }
             
             return res.status(200).json({ message: "Grupo actualizado con éxito", grupo });
@@ -104,5 +112,36 @@ export const getMyGroup = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: "Error al obtener el detalle del grupo" });
+    }
+};
+// 4. ELIMINAR GRUPO
+export const deleteGroup = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const admin_id = req.user.id;
+
+        // Verificar que el grupo exista y pertenezca al administrador
+        const grupo = await db.Grupo.findOne({ 
+            where: { id: id, admin_id: admin_id }
+        });
+        
+        if (!grupo) {
+            return res.status(404).json({ message: "Grupo no encontrado" });
+        }
+
+        // Eliminar los registros asociados en GrupoLista (emails)
+        await db.GrupoLista.destroy({ 
+            where: { grupo_id: id } 
+        });
+
+        // Eliminar el grupo principal
+        await db.Grupo.destroy({ 
+            where: { id: id, admin_id: admin_id } 
+        });
+
+        res.status(200).json({ message: "Grupo eliminado con éxito" });
+    } catch (error) {
+        console.error("Error al eliminar grupo:", error);
+        res.status(500).json({ message: "Error al eliminar el grupo" });
     }
 };

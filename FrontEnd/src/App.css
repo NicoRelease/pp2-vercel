@@ -371,3 +371,500 @@ height: 70px;
   .tm-right-col { flex: 1 1 auto; }
   .tm-clock { font-size: 3rem; }
 }
+
+/* ==========================================================================
+   7. BOTONES DE CONFIRMACIÓN DE ELIMINACIÓN
+   ========================================================================== */
+.delete-confirmation {
+  background-color: #fff8e1;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 16px;
+}
+
+.delete-confirmation p {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.delete-confirmation-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.delete-confirm-btn,
+.delete-cancel-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.delete-confirm-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-cancel-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.delete-confirm-btn:hover,
+.delete-cancel-btn:hover {
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   8. ESTILOS PARA BOTONES DE ELIMINACIÓN EN LISTADO
+   ========================================================================== */
+.group-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.group-delete-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+/* ==========================================================================
+   9. GRUPO ADMIN DASHBOARD STYLES
+   ========================================================================== */
+.group-dashboard-container {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.group-sidebar {
+  background-color: #f9fafb;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.group-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.group-sidebar-title {
+  font-weight: 700;
+  color: #374151;
+  font-size: 1.1rem;
+}
+
+.new-group-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.new-group-btn:hover {
+  opacity: 0.9;
+}
+
+.group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.group-item {
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.group-item:hover {
+  background-color: #dbeafe;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.group-item.selected {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.group-item-content {
+  flex: 1;
+  min-width: 0; /* Prevents text overflow issues */
+}
+
+.group-item-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.group-item-meta {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  color: #6b7280;
+}
+
+.group-item.selected .group-item-meta {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.group-editor {
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+}
+
+.group-editor-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #374151;
+}
+
+.form-section {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.email-input-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.email-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.email-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.add-email-btn {
+  background-color: #374151;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.add-email-btn:hover {
+  opacity: 0.9;
+}
+
+.email-tags-container {
+  background-color: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  min-height: 100px;
+}
+
+.email-tags-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.email-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  margin-right: 6px;
+  margin-bottom: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.email-tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #dc3545;
+  font-weight: bold;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-size: 1rem;
+}
+
+.save-btn.updating {
+  background-color: #f59e0b;
+}
+
+.save-btn.creating {
+  background-color: #10b981;
+}
+
+.save-btn:hover {
+  opacity: 0.9;
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   10. ADMIN DASHBOARD STYLES
+   ========================================================================== */
+.admin-dashboard-header {
+  background-color: #1f2937;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.admin-dashboard-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-dashboard-logout-btn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.admin-dashboard-logout-btn:hover {
+  background-color: #dc2626;
+}
+
+.admin-dashboard-content {
+  width: 100%;
+  max-width: 1200px;
+}
+
+.admin-dashboard-table-container {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.admin-dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-dashboard-table-header {
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-dashboard-table-header-cell {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.admin-dashboard-table-row {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.admin-dashboard-table-row:hover {
+  background-color: #f9fafb;
+}
+
+.admin-dashboard-table-cell {
+  padding: 1rem;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.admin-dashboard-table-cell:first-child {
+  font-weight: 600;
+}
+
+.admin-dashboard-user-role {
+  background-color: #e5e7eb;
+  color: #374151;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.admin-dashboard-user-group {
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.admin-dashboard-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-dashboard-action-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.admin-dashboard-edit-btn {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.admin-dashboard-edit-btn:hover {
+  background-color: #2563eb;
+}
+
+.admin-dashboard-delete-btn {
+  background-color: #ef4444;
+  color: white;
+}
+
+.admin-dashboard-delete-btn:hover {
+  background-color: #dc2626;
+}
+
+.admin-dashboard-save-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.admin-dashboard-save-btn:hover {
+  background-color: #059669;
+}
+
+.admin-dashboard-cancel-btn {
+  background-color: #6b7280;
+  color: white;
+}
+
+.admin-dashboard-cancel-btn:hover {
+  background-color: #4b5563;
+}
+
+.admin-dashboard-checkbox {
+  height: 1.25rem;
+  width: 1.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.admin-dashboard-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  font-size: 1.25rem;
+  color: #374151;
+}
