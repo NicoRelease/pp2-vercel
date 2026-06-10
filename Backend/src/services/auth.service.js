@@ -58,10 +58,25 @@ export const loginUser = async (userIdentifier, password) => {
 };
 
 export const registerUser = async (username, email, plainPassword, selectedRolId = null) => {
+    // Validaciones iniciales
+    if (!username || !email || !plainPassword) {
+        const error = new Error("Todos los campos son requeridos.");
+        error.status = 400;
+        throw error;
+    }
+
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = plainPassword.trim();
     const cleanUsername = username.trim();
     
+    // Validar formato de correo
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        const error = new Error("Formato de correo electrónico inválido.");
+        error.status = 400;
+        throw error;
+    }
+    
+    // Verificar si el usuario ya existe
     const userExists = await db.User.findOne({ where: { email: cleanEmail } });
     if (userExists) {
         const error = new Error("El correo electrónico ya está registrado.");
@@ -73,6 +88,7 @@ export const registerUser = async (username, email, plainPassword, selectedRolId
     let group_id = null;
     let estado = false; 
 
+    // Verificar si es un SysAdmin (Whitelist)
     const sysAdminEntry = await db.Whitelist.findOne({ 
         where: { email: cleanEmail, activo: true } 
     });
@@ -81,6 +97,7 @@ export const registerUser = async (username, email, plainPassword, selectedRolId
         rol_id = 1; 
         estado = true; 
     } else {
+        // Si no es SysAdmin, se requiere seleccionar un rol
         if (!selectedRolId) {
             const error = new Error("Debe seleccionar un tipo de cuenta.");
             error.status = 400;
@@ -90,9 +107,17 @@ export const registerUser = async (username, email, plainPassword, selectedRolId
 
         rol_id = Number(selectedRolId);
 
+        // Validar que el rol sea válido
+        if (rol_id !== 2 && rol_id !== 3) {
+            const error = new Error("Tipo de cuenta inválido.");
+            error.status = 400;
+            throw error;
+        }
+
         if (rol_id === 2) {
             estado = true; 
         } else if (rol_id === 3) {
+            // Para rol 3, buscar en GrupoLista
             const grupoAsociado = await db.GrupoLista.findOne({
                 where: {
                     email: { [db.Op.like]: `%${cleanEmail}%` }
@@ -103,40 +128,51 @@ export const registerUser = async (username, email, plainPassword, selectedRolId
                 group_id = grupoAsociado.grupo_id;
                 estado = true; 
             } else {
+                // Para usuarios de rol 3 que no están en GrupoLista:
+                // Se permite el registro pero sin grupo asignado y con estado pendiente
+                group_id = null;
                 estado = false; 
             }
         }
     }
 
+    // Hash de contraseña
     const hashedPassword = await bcrypt.hash(cleanPassword, SALT_ROUNDS);
-
+console.log('Datos del usuario antes de registrado:',{
+    username: cleanUsername,
+    email: cleanEmail,
+    password: hashedPassword
+});
+    // Crear usuario
     const newUser = await db.User.create({
         username: cleanUsername,
         email: cleanEmail,
         password: hashedPassword,
         rol_id,
-        group_id,
+        group_id,  // Este puede ser null
         estado
     });
-
+console.log('Usuario registrado antes de pasarlo al controlador:',newUser);
     // =======================================================
     // AJUSTE PARA GROUP ADMIN (ROL 2)
     // =======================================================
     if (rol_id === 2) {
-        await db.Grupo.create({
+        const grupo = await db.Grupo.create({
             nombre_grupo: `Grupo de ${cleanUsername}`,
             admin_id: newUser.id,
-            // IMPORTANTE: Si la DB tiene una FK en 'email', no podemos dejarlo vacío.
-            // Lo inicializamos con el email del propio Admin para que la FK sea válida.
             email: cleanEmail 
         });
+        
+        // Actualizar el group_id del usuario con el ID del grupo creado
+        newUser.group_id = grupo.id;
+        await newUser.save();
     }
 
-    const token = generateToken(newUser);
+    const token = generateToken(newUser.id);
     
     return { 
         user: { 
-             
+            id: newUser.id,
             username: newUser.username, 
             email: newUser.email,
             rol_id: newUser.rol_id,

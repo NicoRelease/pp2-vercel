@@ -44,7 +44,8 @@ export const register = async (req, res) => {
 
     const email = decryptTransport(encryptedEmail); 
     const password = decryptTransport(encryptedPassword);
-
+console.log('Datos recibidos en register:', { username, email, password, rol_id });
+console.log('Encrypted data:', { encryptedEmail, encryptedPassword });
     if (!username || !email || !password) {
         return res.status(400).json({ error: "Por favor, complete todos los campos." });
     }

@@ -14,11 +14,7 @@ export default (sequelize) => {
         },
         grupo_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: 'grupo',
-                key: 'id'
-            }
+            allowNull: false
         }
     }, {
         tableName: 'grupo_lista',
