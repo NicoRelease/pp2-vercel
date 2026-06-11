@@ -6,7 +6,7 @@ import CryptoJS from 'crypto-js';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [loginUser, setLoginUser] = useState("@correo.com");
+  const [loginUser, setLoginUser] = useState("uno.usuario@correo.com");
   const [loginPassword, setLoginPassword] = useState("1234");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(""); 
@@ -24,7 +24,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage(""); 
-    setIsLoading(true);0
+    setIsLoading(true);
 
     const encryptedUser = encrypt(loginUser);
     const encryptedPassword = encrypt(loginPassword);
@@ -43,25 +43,48 @@ export default function Login() {
         localStorage.setItem('UserId', data.user.id);
         localStorage.setItem('user', JSON.stringify(data.user));
 
-        const { rol_id, estado } = data.user;
+        const { rol_id, estado, group_id} = data.user;
+        let groupResponse = null;
+        
+        if (group_id) {
+          try {
+            const response = await fetch(`${API_BASE_URL}/groups/byGroupId/${group_id}`, {
+              method: "GET",
+              headers: { 'Authorization': `Bearer ${data.token}`,"Content-Type": "application/json" },
+            });
 
+            groupResponse = await response.json();
+            console.log("Respuesta del servicio:", groupResponse);
+          }
+          catch (error) {
+            console.error("Error al obtener detalles del grupo:", error);
+          }
+          console.log("Rol ID:", rol_id, "Estado:", estado, "Group ID:", group_id, "groupResonse:",groupResponse, "groupResponseLenght:", groupResponse ? groupResponse.usuarios.length : "N/A");
+          
+          // Primero verificamos si debe ir a grupo-resumen
+          if (rol_id === 3 && groupResponse && groupResponse.usuarios && groupResponse.usuarios.length > 0) {
+            navigate("/grupo-resumen");
+            return; // Salimos de la función para evitar que continúe
+          }
+        }
+        
+        // Lógica de navegación principal
         if (estado === false) {
-        navigate("/waiting-room");
-    } 
-    else if (rol_id === 1) {
-        navigate("/admin-dashboard");
-    } 
-    else if (rol_id === 2) {
-        navigate("/group-admin");
-    } 
-    else if (rol_id === 3) {
-        navigate("/gestor-estudio");
-    } 
-    else {
-        navigate("/waiting-room");
-    }
-}
-       else {
+          navigate("/waiting-room");
+        } 
+        else if (rol_id === 1) {
+          navigate("/admin-dashboard");
+        } 
+        else if (rol_id === 2) {
+          navigate("/group-admin");
+        } 
+        else if (rol_id === 3 && (!groupResponse || !groupResponse.usuarios || groupResponse.usuarios.length === 0)) {
+          navigate("/gestor-estudio");
+        } 
+        else {
+          navigate("/waiting-room");
+        }
+      } else {
         setErrorMessage(data.error || "Credenciales incorrectas.");
       }
     } catch (err) {

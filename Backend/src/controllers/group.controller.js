@@ -114,6 +114,7 @@ export const getMyGroup = async (req, res) => {
         res.status(500).json({ message: "Error al obtener el detalle del grupo" });
     }
 };
+
 // 4. ELIMINAR GRUPO
 export const deleteGroup = async (req, res) => {
     try {
@@ -143,5 +144,54 @@ export const deleteGroup = async (req, res) => {
     } catch (error) {
         console.error("Error al eliminar grupo:", error);
         res.status(500).json({ message: "Error al eliminar el grupo" });
+    }
+};
+
+// 5. OBTENER USUARIOS POR ID DE GRUPO
+export const getGroupById = async (req, res) => {
+    console.log("Obteniendo usuarios para el grupo ID:", req.params); // Verificar que se recibe el ID del grupo
+    try {
+        const { group_id } = req.params;
+        console.log("ID del grupo recibido:", group_id); // Verificar que el ID del grupo se recibe correctamente
+        
+        // Verificar que el grupo exista
+        const grupo = await db.Grupo.findOne({ 
+            where: { id: group_id }
+        });
+        console.log("Grupo encontrado:", grupo); // Verificar que el grupo se encontró
+        if (!grupo) {
+            return res.status(404).json({ message: "Grupo no encontrado" });
+        }
+
+        // Obtener todos los usuarios (usuarios de la base de datos) que pertenecen a este grupo
+        // Primero obtenemos los emails del grupo
+        const emails = await db.GrupoLista.findAll({
+            where: { grupo_id: group_id },
+            attributes: ['email']
+        });
+        console.log("Emails asociados al grupo:", emails); // Verificar los emails asociados al grupo
+        // Si no hay emails en el grupo, devolvemos un array vacío
+        if (!emails || emails.length === 0) {
+            return res.status(200).json({ 
+                grupo: grupo.toJSON(),
+                usuarios: []
+            });
+        }
+        
+        // Obtener los usuarios que tienen estos emails
+        const usuarios = await db.User.findAll({
+            where: {
+                email: emails.map(email => email.email)
+            },
+            attributes: ['id', 'email', 'username', 'rol_id', 'estado']
+        });
+
+        res.status(200).json({ 
+            grupo: grupo.toJSON(),
+            usuarios: usuarios.map(usuario => usuario.toJSON())
+        });
+    } catch (error) {
+        console.error("Error al obtener usuarios por ID de grupo:", error);
+        res.status(500).json({ message: "Error al obtener los usuarios del grupo" });
     }
 };

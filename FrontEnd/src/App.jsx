@@ -8,6 +8,7 @@ import TareaManager from './components/TareaManager';
 import SessionDetail from './components/SessionDetail';
 import Login from './components/Login';
 import Register from './components/Register';
+import GroupResume from './components/GrupoResumen';
 
 // Importa los nuevos componentes
 import AdminDashboard from './components/AdminDashboard';
@@ -34,6 +35,7 @@ function App() {
 
             {/* Rutas de la Aplicación */}
             <Route path="/crear-sesion" element={<SessionForm />} />
+            <Route path="/grupo-resumen" element={<GroupResume />} />
             <Route path="/gestor-estudio" element={<GestorEstudio />} />
             <Route path="/tareas/:tareaId" element={<TareaManager />} />
             <Route path="/session/:id" element={<SessionDetail />} />

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import HeaderNoLink from './HeaderNoLink'; 
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
@@ -123,22 +124,8 @@ const AdminDashboard = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <header className="admin-dashboard-header">
-                <div className="flex items-center gap-6">
-                    <span className="admin-dashboard-title">ADMIN | Optimizador</span>
-                    <button onClick={() => navigate('/')} className="text-sm hover:text-blue-400 transition">Ir al Inicio</button>
-                </div>
-                <button 
-                    onClick={() => { 
-                        localStorage.removeItem('authToken'); 
-                        navigate('/login'); 
-                    }} 
-                    className="admin-dashboard-logout-btn"
-                >
-                    Cerrar Sesión
-                </button>
-            </header>
-
+            <HeaderNoLink />
+            
             <main className="admin-dashboard-content">
                 <h2 className="text-2xl font-bold mb-6 text-gray-800">Gestión de Usuarios</h2>
                 
