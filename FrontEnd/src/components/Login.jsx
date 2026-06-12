@@ -42,6 +42,7 @@ export default function Login() {
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('UserId', data.user.id);
         localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('userGroup', data.user.group_id);
 
         const { rol_id, estado, group_id} = data.user;
         let groupResponse = null;
@@ -59,6 +60,7 @@ export default function Login() {
           catch (error) {
             console.error("Error al obtener detalles del grupo:", error);
           }
+          localStorage.setItem('group_id', group_id);
           console.log("Rol ID:", rol_id, "Estado:", estado, "Group ID:", group_id, "groupResonse:",groupResponse, "groupResponseLenght:", groupResponse ? groupResponse.usuarios.length : "N/A");
           
           // Primero verificamos si debe ir a grupo-resumen

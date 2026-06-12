@@ -32,17 +32,21 @@ router.get('/tarea-del-dia/actual', protect, sesionesController.obtenerTareaDelD
 // 8. VALIDAR fecha de examen
 router.post('/validar-fecha', protect, sesionesController.validarFechaExamen);
 
+// 9. Obtener sesiones por ID de grupo
+router.get('/grupo/:group_id', protect, sesionesController.obtenerSesionesPorGrupoId);
+
+
 // =======================================================
 // RUTAS PARA TAREAS (CONTENIDO DE LAS SESIONES)
 // =======================================================
 
-// 9. GESTIONAR una tarea específica
+// 10. GESTIONAR una tarea específica
 router.post('/tareas/:id/gestionar', protect, sesionesController.gestionarTarea);
 
-// 10. ELIMINAR una tarea específica
+// 11. ELIMINAR una tarea específica
 router.delete('/tareas/:id', protect, sesionesController.eliminarTarea);
 
-// 11. OBTENER una tarea específica por ID
+// 12. OBTENER una tarea específica por ID
 router.get('/tareas/:id', protect, sesionesController.obtenerTareaPorId);
 
 export default router;

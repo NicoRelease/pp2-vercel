@@ -149,7 +149,7 @@ export const deleteGroup = async (req, res) => {
 
 // 5. OBTENER USUARIOS POR ID DE GRUPO
 export const getGroupById = async (req, res) => {
-    console.log("Obteniendo usuarios para el grupo ID:", req.params); // Verificar que se recibe el ID del grupo
+    
     try {
         const { group_id } = req.params;
         console.log("ID del grupo recibido:", group_id); // Verificar que el ID del grupo se recibe correctamente
@@ -169,7 +169,7 @@ export const getGroupById = async (req, res) => {
             where: { grupo_id: group_id },
             attributes: ['email']
         });
-        console.log("Emails asociados al grupo:", emails); // Verificar los emails asociados al grupo
+        console.log("Emails asociados al grupo:", emails.map(email => email.email)); // Verificar los emails asociados al grupo
         // Si no hay emails en el grupo, devolvemos un array vacío
         if (!emails || emails.length === 0) {
             return res.status(200).json({ 
@@ -183,15 +183,18 @@ export const getGroupById = async (req, res) => {
             where: {
                 email: emails.map(email => email.email)
             },
-            attributes: ['id', 'email', 'username', 'rol_id', 'estado']
+            attributes: ['id']
         });
-
+console.log("Usuarios encontrados para los emails del grupo:", usuarios); // Verificar los usuarios encontrados para los emails del grupo
         res.status(200).json({ 
             grupo: grupo.toJSON(),
             usuarios: usuarios.map(usuario => usuario.toJSON())
+            
         });
+        console.log("ID de usuarios encontrados para los emails del grupo:", usuarios.map(usuario => usuario.id)); // Verificar los usuarios encontrados para los emails del grupo
     } catch (error) {
         console.error("Error al obtener usuarios por ID de grupo:", error);
         res.status(500).json({ message: "Error al obtener los usuarios del grupo" });
     }
+    //console.log("ID de usuarios encontrados para los emails del grupo:", usuarios.map(usuario => usuario.id)); // Verificar los usuarios encontrados para los emails del grupo
 };
