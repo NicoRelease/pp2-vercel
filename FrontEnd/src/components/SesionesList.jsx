@@ -9,7 +9,7 @@ const StatBox = ({ emoji, label, value, color = '#333' }) => (
   </div>
 );
 
-const SesionesList = ({ sesiones, onDeleteSession, onEditSession, onSelectSession, onTareaClick }) => {
+const SesionesList = ({ sesiones, onDeleteSession, onEditSession, onSelectSession, onTareaClick, userId }) => {
   
   const hoy = new Date();
   const hoy1 = hoy.toISOString().split('T')[0];
@@ -37,7 +37,7 @@ const SesionesList = ({ sesiones, onDeleteSession, onEditSession, onSelectSessio
       </div>
     );
   }
-
+  
   return (
     <div style={styles.mainLayout}>
       
@@ -47,7 +47,7 @@ const SesionesList = ({ sesiones, onDeleteSession, onEditSession, onSelectSessio
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {sesiones.map((sesion) => {
             const esVencida = sesion.fecha_examen < hoy1;
-
+            
             return (
               <div key={sesion.id} style={styles.sessionGroup}>
                 <div 
@@ -84,20 +84,38 @@ const SesionesList = ({ sesiones, onDeleteSession, onEditSession, onSelectSessio
                 </div>
 
                 <div style={styles.taskContainer}>
+                  
                   {sesion.tareas && sesion.tareas.length > 0 ? (
-                    sesion.tareas.map((tarea) => (
-                      <div 
-                        key={tarea.id} 
-                        style={styles.taskItem}
-                        onClick={() => onTareaClick && onTareaClick(tarea, sesion)}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <span>{tarea.es_completada ? '✅' : '📝'}</span>
-                          <span style={{ fontSize: '14px', color: '#444' }}>{tarea.nombre}</span>
+                    sesion.tareas.map((tarea) => {
+                      // Verificar si el usuario puede editar esta tarea
+                      console.log("Ids", tarea.sesion_id, sesion.id, sesion.user_id, userId);
+                      
+                      // Lógica corregida para verificar permisos
+                      const puedeEditar = (tarea?.sesion_id === sesion?.id) && (sesion?.user_id === JSON.parse(userId));
+            
+                      
+                      return (
+                        <div 
+                          key={tarea.id} 
+                          style={styles.taskItem}
+                          onClick={() => {
+                            if (puedeEditar) {
+                              console.log("Ejecutando onTareaClick para tarea:", tarea.nombre);
+                              onTareaClick && onTareaClick(tarea, sesion);
+                            } else {
+                              alert("No tienes permiso para editar esta tarea.");
+                              console.log("No se permite editar esta tarea");
+                            }
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span>{tarea.es_completada ? '✅' : '📝'}</span>
+                            <span style={{ fontSize: '14px', color: '#444' }}>{tarea.nombre}</span>
+                          </div>
+                          <span style={styles.taskTime}>{tarea.duracion_estimada} min</span>
                         </div>
-                        <span style={styles.taskTime}>{tarea.duracion_estimada} min</span>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div style={styles.noTasks}>Sin tareas asignadas</div>
                   )}

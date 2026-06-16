@@ -215,7 +215,8 @@ const GrupoResumen = () => {
         
         {/* Contenido según vista seleccionada */}
         {vistaActual === 'sesiones' ? (
-          <SesionesList 
+          <SesionesList
+            userId={UserId} 
             sesiones={data}
             onSessionClick={handleSessionClick}
             onTareaClick={handleTareaClick}
@@ -224,7 +225,8 @@ const GrupoResumen = () => {
             onGestionarTarea={handleGestionarTarea}
           />
         ) : (
-          <TareasPorFecha 
+          <TareasPorFecha
+            userId={UserId} 
             sesiones={data}
             onTareaClick={handleTareaClick}
             onDeleteTarea={handleDeleteTarea}
