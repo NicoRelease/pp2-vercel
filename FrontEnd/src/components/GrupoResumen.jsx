@@ -18,7 +18,7 @@ const GrupoResumen = () => {
   const authToken = localStorage.getItem('authToken');
   const group_id = localStorage.getItem('group_id');
   const UserId = localStorage.getItem('UserId');
-  console.log("Datos del usuario:", { UserId:UserId, group_id: group_id});
+  
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || '/backend';
   

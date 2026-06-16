@@ -88,7 +88,7 @@ const SesionesList = ({ sesiones, onDeleteSession, onEditSession, onSelectSessio
                   {sesion.tareas && sesion.tareas.length > 0 ? (
                     sesion.tareas.map((tarea) => {
                       // Verificar si el usuario puede editar esta tarea
-                      console.log("Ids", tarea.sesion_id, sesion.id, sesion.user_id, userId);
+                      
                       
                       // Lógica corregida para verificar permisos
                       const puedeEditar = (tarea?.sesion_id === sesion?.id) && (sesion?.user_id === JSON.parse(userId));

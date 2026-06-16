@@ -1,4 +1,3 @@
-// components/GestorEstudio.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -15,9 +14,10 @@ const GestorEstudio = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   
-  // Obtener token y userId desde localStorage
+  // Obtener token desde localStorage
   const authToken = localStorage.getItem('authToken');
-  const userId = localStorage.getItem('UserId');
+  const group_id = localStorage.getItem('group_id');
+  const UserId = localStorage.getItem('UserId');
   
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || '/backend';
@@ -34,36 +34,44 @@ const GestorEstudio = () => {
     setLoading(true);
     setError(null);
 
-    // Validar autenticación
-    if (!authToken || !userId) {
-      navigate('/Login');
-      setError('No autorizado. Por favor, inicia sesión.');
-      setLoading(false);
-      return;
+    if (!authToken) {
+        navigate('/Login');
+        setError('No autorizado. Por favor, inicia sesión.');
+        setLoading(false);
+        return;
     }
 
     try {
-      
-      const url = `${API_BASE_URL}/sesiones/user/${userId}`;
-      
-      const response = await axios.get(url, getConfig());
-      setData(response.data);
-      
+        const url = `${API_BASE_URL}/sesiones/user/${UserId}`;
+
+        console.log("Cargando sesiones desde:", url);
+        
+        // Añadir timeout para mejor experiencia de usuario
+        const response = await axios.get(url, getConfig());
+        setData(response.data);
+        console.log("Sesiones obtenidas:", response.data);
     } catch (err) {
-
-      
-      const errorMsg = 'Error al cargar las sesiones: ' + 
-        (err.response?.data?.message || err.response?.data?.error || err.message);
-      
-      setError(errorMsg);
-      
-      // Si es error 404, sugerir verificar la ruta
-
-      
+        console.error("Error completo al cargar sesiones:", err);
+        
+        let errorMsg = 'Error al cargar las sesiones';
+        
+        if (err.response) {
+            // Error del servidor
+            errorMsg = `Error ${err.response.status}: ${err.response.data?.message || err.response.data?.error || 'Error desconocido'}`;
+        } else if (err.request) {
+            // Error de red
+            errorMsg = 'No se pudo conectar con el servidor. Verifica tu conexión.';
+        } else {
+            // Otro error
+            errorMsg = `Error: ${err.message}`;
+        }
+        
+        setError(errorMsg);
     } finally {
-      setLoading(false)
+        setLoading(false);
     }
-  };
+};
+
 
   useEffect(() => {
     fetchSesiones();
@@ -208,7 +216,8 @@ const GestorEstudio = () => {
         
         {/* Contenido según vista seleccionada */}
         {vistaActual === 'sesiones' ? (
-          <SesionesList 
+          <SesionesList
+            userId={UserId} 
             sesiones={data}
             onSessionClick={handleSessionClick}
             onTareaClick={handleTareaClick}
@@ -217,7 +226,8 @@ const GestorEstudio = () => {
             onGestionarTarea={handleGestionarTarea}
           />
         ) : (
-          <TareasPorFecha 
+          <TareasPorFecha
+            userId={UserId} 
             sesiones={data}
             onTareaClick={handleTareaClick}
             onDeleteTarea={handleDeleteTarea}

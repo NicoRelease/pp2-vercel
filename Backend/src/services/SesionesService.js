@@ -12,6 +12,7 @@ const diasEntre = (start, end) => {
 };
 
 export const obtenerSesionesPorUsuario = async (userId) => {
+    console.log("UserId dentro del service",userId)
     return await Sesion.findAll({
         where: { user_id: userId },
         include: [{ model: Tarea, as: 'tareas' }],
