@@ -16,6 +16,7 @@ export default function GroupAdminDashboard() {
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const API_BASE_URL = import.meta.env.VITE_API_URL;
     const token = localStorage.getItem('authToken');
+    const adminId = localStorage.getItem('userid');
 
     // Cargar todos los grupos del Admin al iniciar
     const cargarGrupos = async () => {

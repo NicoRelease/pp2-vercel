@@ -4,7 +4,16 @@ import db from '../models/index.js';
 export const getAllMyGroups = async (req, res) => {
     
     try {
-        const admin_id = req.user.id;
+        // Corrección: Validar que req.user.id sea un número válido
+        const admin_id = parseInt(req.user.id);
+        
+        // Verificar que la conversión fue exitosa
+        if (isNaN(admin_id)) {
+            return res.status(400).json({ 
+                message: "ID de administrador inválido" 
+            });
+        }
+        
         const grupos = await db.Grupo.findAll({ 
             where: { admin_id: admin_id },
             order: [['created_at', 'DESC']],

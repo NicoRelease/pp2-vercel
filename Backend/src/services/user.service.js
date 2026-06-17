@@ -4,14 +4,28 @@ import db from '../models/index.js';
 
 // Obtener todos los usuarios
 export const getAllUsers = async () => {
-    return await db.User.findAll({
-        attributes: ['id', 'username', 'email', 'estado', 'rol_id', 'group_id'],
+    const users = await db.User.findAll({
+        attributes: ['id', 'username', 'email', 'estado', 'rol_id', 'group_id', 'created_at'],
         include: [
             { model: db.Rol, as: 'rol', attributes: ['nombre'] },
-            { model: db.Grupo, as: 'grupo', attributes: ['nombre_grupo'] } // Cambiado a nombre_grupo
+            { 
+                model: db.Grupo, 
+                as: 'grupo', 
+                attributes: ['nombre_grupo'] 
+            }
         ]
     });
+    
+    // Convertir group_id a número si es necesario
+    return users.map(user => {
+        const userData = user.toJSON();
+        if (userData.group_id !== null && userData.group_id !== undefined) {
+            userData.group_id = Number(userData.group_id);
+        }
+        return userData;
+    });
 };
+
 
 // Editar un usuario
 export const updateUser = async (userId, userData) => {
