@@ -38,7 +38,7 @@ export default function Register() {
         setError('');
     
         try {
-            console.log('Datos a enviar en register:', { username, email, password, rol_id });
+           
             
             const response = await fetch(`${API_BASE_URL}/register`, {
                 method: 'POST',
@@ -52,7 +52,7 @@ export default function Register() {
             });
             
             const data = await response.json();
-            console.log('Respuesta del backend:', data);
+            
             
             if (!response.ok) {
                 setError(data.error || 'Error en el registro.');

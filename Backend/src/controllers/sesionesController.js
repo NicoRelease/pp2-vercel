@@ -1,15 +1,15 @@
 import * as SesionesService from '../services/SesionesService.js';
 
 export const obtenerTodasLasSesionesUsuario = async (req, res) => {
-    console.log("DatoRecibido:",req.params.UserId)
+    
     try {
         const user_id = req.params.UserId;
-        console.log("Este es el user_id:", user_id);
+        
         if (!user_id) return res.status(400).json({ error: 'ID de usuario no proporcionado' });
         
         const sesiones = await SesionesService.obtenerSesionesPorUsuario(user_id);
         res.json(sesiones);
-        console.log ("Este es el resultado de la consulta al servicio: ",sesiones)
+        
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener sesiones.', error: error.message });
     }
@@ -18,7 +18,7 @@ export const obtenerTodasLasSesionesUsuario = async (req, res) => {
 export const crearSesion = async (req, res) => {
     try {
         const { user_id, nombre, fecha_examen, duracion_diaria_estimada } = req.body;
-        console.log("Datos recibidos para crear sesión:", req.body);
+        
         if (!user_id || !nombre || !fecha_examen || !duracion_diaria_estimada) {
             return res.status(400).json({ message: "Faltan campos obligatorios" });
         }

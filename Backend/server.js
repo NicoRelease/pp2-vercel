@@ -6,6 +6,7 @@ import groupRoutes from './src/routes/groupRoutes.js';
 import whitelistRoutes from './src/routes/whitelist.routes.js';
 import express from 'express';
 import adminRoutes from './src/routes/admin.routes.js';
+import userRoutes from './src/routes/users.routes.js';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/backend/sesiones', sesionesRouter);
 app.use('/backend/groups', groupRoutes);
 app.use('/backend/whitelist', whitelistRoutes);
 app.use('/backend/admin', adminRoutes);
+app.use('/backend/user', userRoutes);
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     app.listen(3000, () => {

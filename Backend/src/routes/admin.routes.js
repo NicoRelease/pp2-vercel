@@ -15,9 +15,9 @@ const router = express.Router();
 // En admin.routes.js
 router.get('/users', protect, async (req, res) => {
     try {
-        console.log('Usuario autenticado:', req.user); // Debug
+       
         const users = await getAllUsers();
-        console.log('Usuarios obtenidos:', users); // Debug
+       
         res.status(200).json(users);
     } catch (error) {
         console.error('Error completo:', error); // Debug

@@ -55,13 +55,13 @@ export default function Login() {
             });
 
             groupResponse = await response.json();
-            console.log("Respuesta del servicio:", groupResponse);
+            
           }
           catch (error) {
             console.error("Error al obtener detalles del grupo:", error);
           }
           localStorage.setItem('group_id', group_id);
-          console.log("Rol ID:", rol_id, "Estado:", estado, "Group ID:", group_id, "groupResonse:",groupResponse, "groupResponseLenght:", groupResponse ? groupResponse.usuarios.length : "N/A");
+          
           
           // Primero verificamos si debe ir a grupo-resumen
           if (rol_id === 3 && groupResponse && groupResponse.usuarios && groupResponse.usuarios.length > 0) {

@@ -138,11 +138,7 @@ export const registerUser = async (username, email, plainPassword, selectedRolId
 
     // Hash de contraseña
     const hashedPassword = await bcrypt.hash(cleanPassword, SALT_ROUNDS);
-console.log('Datos del usuario antes de registrado:',{
-    username: cleanUsername,
-    email: cleanEmail,
-    password: hashedPassword
-});
+
     // Crear usuario
     const newUser = await db.User.create({
         username: cleanUsername,
@@ -152,7 +148,7 @@ console.log('Datos del usuario antes de registrado:',{
         group_id,  // Este puede ser null
         estado
     });
-console.log('Usuario registrado antes de pasarlo al controlador:',newUser);
+
     // =======================================================
     // AJUSTE PARA GROUP ADMIN (ROL 2)
     // =======================================================

@@ -20,7 +20,7 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('authToken');
-            console.log('authToken:', token);
+            
             const [usersRes, groupsRes] = await Promise.all([
                 fetch('/backend/admin/users', { headers: { 'Authorization': `Bearer ${token}` } }),
                 fetch('/backend/admin/groups', { headers: { 'Authorization': `Bearer ${token}` } })

@@ -44,12 +44,12 @@ const GestorEstudio = () => {
     try {
         const url = `${API_BASE_URL}/sesiones/user/${UserId}`;
 
-        console.log("Cargando sesiones desde:", url);
+        
         
         // Añadir timeout para mejor experiencia de usuario
         const response = await axios.get(url, getConfig());
         setData(response.data);
-        console.log("Sesiones obtenidas:", response.data);
+        
     } catch (err) {
         console.error("Error completo al cargar sesiones:", err);
         
@@ -100,7 +100,7 @@ const GestorEstudio = () => {
     try {
       // ✅ URL CORREGIDA: /sesiones/:id
       await axios.delete(`${API_BASE_URL}/sesiones/${sessionId}`, getConfig());
-      console.log('✅ Sesión eliminada con éxito');
+
       alert('Sesión eliminada con éxito.');
       fetchSesiones();
     } catch (err) {

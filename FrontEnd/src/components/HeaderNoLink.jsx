@@ -2,12 +2,13 @@ import React, { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../App.css';
 
-const Title = "Optimizador de Estudio";
+const Title = "Gestioná tu tiempo";
 
 //Gestión de hipervinculos
 const mainNavLinks = [
   { path: '/Crear-sesion', label: 'Crear Sesión' },
   { path: '/gestor-estudio', label: 'Listado de sesiones' },
+  { path: '/grupo-resumen', label: 'Listado de grupo' },
 ];
 const authNavLinks = [
   { path: '/', label: 'Inicio' },
@@ -21,7 +22,7 @@ const HeaderNoLink = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('UserId');
     navigate('/');
-    console.log('Sesión cerrada.');
+    
   };
 
   //Lógica de ubicación por URL
@@ -30,6 +31,7 @@ const HeaderNoLink = () => {
   const isRegisterPage = currentPath === '/register' || currentPath.endsWith('/register');
   const isAdminDashboard = currentPath === '/admin-dashboard' || currentPath.endsWith('/admin-dashboard');
   const isGroupAdmin = currentPath === '/group-admin' || currentPath.endsWith('/group-admin');
+  const isOnGestorEstudio = currentPath === '/gestor-estudio' || currentPath.endsWith('/gestor-estudio');
   const isHomePage = currentPath === '/' || currentPath === ''; 
 
   // Determinar qué links mostrar según la página actual

@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 export const protect = async (req, res, next) => {
     // 1. Obtener el token del encabezado (Header)
- console.log('Header recibido:', req.headers.authorization);
+ 
     let token;
     
     // El token típicamente viene como: "Bearer TOKEN_AQUI"

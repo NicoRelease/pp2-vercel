@@ -12,7 +12,7 @@ const diasEntre = (start, end) => {
 };
 
 export const obtenerSesionesPorUsuario = async (userId) => {
-    console.log("UserId dentro del service",userId)
+    
     return await Sesion.findAll({
         where: { user_id: userId },
         include: [{ model: Tarea, as: 'tareas' }],
@@ -24,7 +24,7 @@ export const obtenerSesionesPorUsuario = async (userId) => {
 };
 
 export const crearNuevaSesion = async (datos) => {
-    console.log("Datos recibidos en servicio para crear sesión:", datos);
+    
     const { user_id, nombre, fecha_examen, duracion_diaria_estimada, group_id } = datos;
     const t = await sequelize.transaction();
 
@@ -55,7 +55,7 @@ export const crearNuevaSesion = async (datos) => {
             fecha_programada: fechaInicio,
             grupo_id: group_id
         }, { transaction: t });
-        console.log("Datos de crear Sesión// Backend", nuevaSesion);
+        
         let tiempoRestante = duracionTotalEstimada;
         let tareasProgramadas = [];
         let fechaActual = new Date(fechaInicio);
@@ -79,13 +79,13 @@ export const crearNuevaSesion = async (datos) => {
         await t.commit();
         return { nuevaSesion, tareasCount: tareasProgramadas.length };
         } catch (error) {
-            console.log("Error al crear sesión o tareas:", error);
+            
             await t.rollback();
             throw error;
         }
         
     } catch (error) {
-        console.log("Error al crear sesión:", error); // Mover esta línea antes del throw
+        ("Error al crear sesión:", error); // Mover esta línea antes del throw
         await t.rollback();
         throw error;
     }

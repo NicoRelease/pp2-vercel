@@ -100,11 +100,11 @@ const SesionesList = ({ sesiones, onDeleteSession, onEditSession, onSelectSessio
                           style={styles.taskItem}
                           onClick={() => {
                             if (puedeEditar) {
-                              console.log("Ejecutando onTareaClick para tarea:", tarea.nombre);
+                              
                               onTareaClick && onTareaClick(tarea, sesion);
                             } else {
                               alert("No tienes permiso para editar esta tarea.");
-                              console.log("No se permite editar esta tarea");
+                              
                             }
                           }}
                         >

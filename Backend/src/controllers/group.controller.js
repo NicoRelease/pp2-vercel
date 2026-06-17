@@ -2,7 +2,7 @@ import db from '../models/index.js';
 
 // 1. OBTENER TODOS LOS GRUPOS (Para el listado de la izquierda)
 export const getAllMyGroups = async (req, res) => {
-    console.log("Usuario autenticado:", req.user); // Verificar que req.user esté presente
+    
     try {
         const admin_id = req.user.id;
         const grupos = await db.Grupo.findAll({ 
@@ -34,7 +34,7 @@ export const getAllMyGroups = async (req, res) => {
 
 // 2. CREAR O ACTUALIZAR
 export const manageGroup = async (req, res) => {
-    console.log("Datos recibidos en manageGroup:", req.body, req.user.id); // Verificar datos recibidos
+    
     try {
         const { id, nombre_grupo, emails } = req.body;
         const admin_id = req.user.id;
@@ -152,13 +152,13 @@ export const getGroupById = async (req, res) => {
     
     try {
         const { group_id } = req.params;
-        console.log("ID del grupo recibido:", group_id); // Verificar que el ID del grupo se recibe correctamente
+       
         
         // Verificar que el grupo exista
         const grupo = await db.Grupo.findOne({ 
             where: { id: group_id }
         });
-        console.log("Grupo encontrado:", grupo); // Verificar que el grupo se encontró
+        
         if (!grupo) {
             return res.status(404).json({ message: "Grupo no encontrado" });
         }
@@ -169,7 +169,7 @@ export const getGroupById = async (req, res) => {
             where: { grupo_id: group_id },
             attributes: ['email']
         });
-        console.log("Emails asociados al grupo:", emails.map(email => email.email)); // Verificar los emails asociados al grupo
+        
         // Si no hay emails en el grupo, devolvemos un array vacío
         if (!emails || emails.length === 0) {
             return res.status(200).json({ 
@@ -185,16 +185,16 @@ export const getGroupById = async (req, res) => {
             },
             attributes: ['id']
         });
-console.log("Usuarios encontrados para los emails del grupo:", usuarios); // Verificar los usuarios encontrados para los emails del grupo
+
         res.status(200).json({ 
             grupo: grupo.toJSON(),
             usuarios: usuarios.map(usuario => usuario.toJSON())
             
         });
-        console.log("ID de usuarios encontrados para los emails del grupo:", usuarios.map(usuario => usuario.id)); // Verificar los usuarios encontrados para los emails del grupo
+        
     } catch (error) {
         console.error("Error al obtener usuarios por ID de grupo:", error);
         res.status(500).json({ message: "Error al obtener los usuarios del grupo" });
     }
-    //console.log("ID de usuarios encontrados para los emails del grupo:", usuarios.map(usuario => usuario.id)); // Verificar los usuarios encontrados para los emails del grupo
+    
 };
