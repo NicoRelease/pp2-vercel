@@ -21,9 +21,9 @@ export default function Register() {
     const navigate = useNavigate();
     const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-    const [username, setUsername] = useState('Usuario');
-    const [email, setEmail] = useState('.usuario@correo.com');
-    const [password, setPassword] = useState('1234');
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [rol_id, setRolId] = useState(3);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
