@@ -62,7 +62,8 @@ describe('Pruebas Unitarias - SesionesService', () => {
             user_id: 1,
             nombre: 'Examen Test',
             fecha_examen: '2020-01-01',
-            duracion_diaria_estimada: 2
+            duracion_diaria_estimada: 2,
+            group_id: 1
         };
 
         await expect(crearNuevaSesion(datosPasados))
@@ -79,7 +80,8 @@ describe('Pruebas Unitarias - SesionesService', () => {
             user_id: 1,
             nombre: 'Final PP2',
             fecha_examen: mañana.toISOString().split('T')[0],
-            duracion_diaria_estimada: 3
+            duracion_diaria_estimada: 3,
+            group_id: 1
         };
 
         db.Sesion.create.mockResolvedValue({ id: 100, ...datos });
@@ -123,5 +125,47 @@ describe('Pruebas Unitarias - SesionesService', () => {
 
         await expect(borrarSesionCompleta(999))
             .rejects.toThrow("Sesión no encontrada");
+    });
+
+    // TEST 6: Validación de grupo (corrección del error encontrado)
+    test('crearNuevaSesion debe lanzar error si no se proporciona group_id', async () => {
+        const datosSinGrupo = {
+            user_id: 1,
+            nombre: 'Examen Test',
+            fecha_examen: new Date().toISOString().split('T')[0],
+            duracion_diaria_estimada: 2
+            // Sin group_id - este debería lanzar el error
+        };
+
+        await expect(crearNuevaSesion(datosSinGrupo))
+            .rejects.toThrow("El usuario no pertenece a ningún grupo. Asigna un grupo al usuario primero.");
+    });
+
+    // TEST 7: Creación exitosa de sesión
+    test('crearNuevaSesion debe crear una sesión exitosamente', async () => {
+        const hoy = new Date();
+        const mañana = new Date(hoy);
+        mañana.setDate(hoy.getDate() + 1);
+        
+        const datos = {
+            user_id: 1,
+            nombre: 'Examen Final',
+            fecha_examen: mañana.toISOString().split('T')[0],
+            duracion_diaria_estimada: 2,
+            group_id: 1
+        };
+
+        db.Sesion.create.mockResolvedValue({ id: 101, ...datos });
+        db.Tarea.bulkCreate.mockResolvedValue([]);
+
+        const resultado = await crearNuevaSesion(datos);
+        
+        expect(resultado).toBeDefined();
+        expect(db.Sesion.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                nombre: 'Examen Final'
+            }),
+            expect.any(Object)
+        );
     });
 });
