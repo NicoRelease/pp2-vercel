@@ -52,7 +52,7 @@ export default function Register() {
             });
             
             const data = await response.json();
-            console.log ("Respuesta del registro:",response.data)
+            console.log ("Respuesta del registro:",data)
             
             if (!response.ok) {
                 setError(data.error || 'Error en el registro.');
@@ -62,7 +62,7 @@ export default function Register() {
 
             localStorage.setItem('authToken', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
-            localStorage.setItem('userid', JSON.stringify(data.user.id));
+            localStorage.setItem('userId', JSON.stringify(data.user.id));
             alert('¡Registro exitoso!');
             
             // Redirección por Rol

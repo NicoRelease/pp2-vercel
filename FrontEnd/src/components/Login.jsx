@@ -89,6 +89,7 @@ export default function Login() {
       } else {
         setErrorMessage(data.error || "Credenciales incorrectas.");
       }
+      console.log("Datos de user en Login:",data);
     } catch (err) {
       setErrorMessage("Error de conexión.");
     } finally {

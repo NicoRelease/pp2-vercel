@@ -16,7 +16,11 @@ export default function GroupAdminDashboard() {
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const API_BASE_URL = import.meta.env.VITE_API_URL;
     const token = localStorage.getItem('authToken');
-    const adminId = localStorage.getItem('userid');
+    const adminId = localStorage.getItem('userId');
+    const cleanAdminId = adminId ? adminId.trim().replace(/"/g, '') : null;
+    const adminIdNum = Number(cleanAdminId);
+    console.log("ID limpio:", adminId,cleanAdminId,adminIdNum); 
+    
 
     // Cargar todos los grupos del Admin al iniciar
     const cargarGrupos = async () => {
@@ -31,7 +35,7 @@ export default function GroupAdminDashboard() {
                     'Content-Type': 'application/json'
                 }
             });
-            
+            console.log ("datos de response en URL", response)
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || `Error ${response.status}`);
@@ -118,7 +122,7 @@ export default function GroupAdminDashboard() {
     const guardarCambios = async () => {
         setLoading(true);
         setError(null);
-        
+        console.log("IdSeleccionada y adminId:", idSeleccionada, adminId);
         try {
             if (!token) {
                 throw new Error('No se encontró token de autenticación');
@@ -136,6 +140,7 @@ export default function GroupAdminDashboard() {
                 },
                 body: JSON.stringify({
                     id: idSeleccionada,
+                    admin_id: adminIdNum,
                     nombre_grupo: nombreGrupo.trim(),
                     emails: listaEmails
                 }),

@@ -43,10 +43,10 @@ export const getAllMyGroups = async (req, res) => {
 
 // 2. CREAR O ACTUALIZAR
 export const manageGroup = async (req, res) => {
-    
+    console.log ("Datos del body",req.body);
     try {
-        const { id, nombre_grupo, emails } = req.body;
-        const admin_id = req.user.id;
+        const { id, nombre_grupo, emails, admin_id } = req.body;
+        
 
         if (id) {
             // --- MODO EDICIÓN ---
