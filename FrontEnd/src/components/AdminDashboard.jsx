@@ -116,8 +116,8 @@ const AdminDashboard = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="admin-dashboard-loading">Cargando datos...</div>
+            <div className="admin-dashboard-loading">
+                Cargando datos...
             </div>
         );
     }

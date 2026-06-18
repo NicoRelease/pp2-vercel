@@ -19,7 +19,6 @@ export default function GroupAdminDashboard() {
     const adminId = localStorage.getItem('userId');
     const cleanAdminId = adminId ? adminId.trim().replace(/"/g, '') : null;
     const adminIdNum = Number(cleanAdminId);
-    console.log("ID limpio:", adminId,cleanAdminId,adminIdNum); 
     
 
     // Cargar todos los grupos del Admin al iniciar
@@ -29,13 +28,13 @@ export default function GroupAdminDashboard() {
                 throw new Error('No se encontró token de autenticación');
             }
             
-            const response = await fetch(`${API_BASE_URL}/groups/all`, { 
+            const response = await fetch(`${API_BASE_URL}/groups/all/${adminIdNum}`, { 
                 headers: { 
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
-            console.log ("datos de response en URL", response)
+            
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || `Error ${response.status}`);
@@ -88,7 +87,7 @@ export default function GroupAdminDashboard() {
         }
     };
 
-    // En el formulario de emails, se mantiene igual:
+    // Al agregar un email:
     const agregarEmail = (e) => {
         e.preventDefault();
         try {
@@ -122,7 +121,6 @@ export default function GroupAdminDashboard() {
     const guardarCambios = async () => {
         setLoading(true);
         setError(null);
-        console.log("IdSeleccionada y adminId:", idSeleccionada, adminId);
         try {
             if (!token) {
                 throw new Error('No se encontró token de autenticación');

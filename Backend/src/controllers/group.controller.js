@@ -2,10 +2,10 @@ import db from '../models/index.js';
 
 // 1. OBTENER TODOS LOS GRUPOS (Para el listado de la izquierda)
 export const getAllMyGroups = async (req, res) => {
-    
+    console.log ("Datos del body",req.params.id);
     try {
         // Corrección: Validar que req.user.id sea un número válido
-        const admin_id = parseInt(req.user.id);
+        const admin_id = parseInt(req.params.id);
         
         // Verificar que la conversión fue exitosa
         if (isNaN(admin_id)) {

@@ -46,7 +46,7 @@ export default function Login() {
 
         const { rol_id, estado, group_id} = data.user;
         let groupResponse = null;
-        
+        console.log("info del login:",data.user)
         if (group_id) {
           try {
             const response = await fetch(`${API_BASE_URL}/groups/byGroupId/${group_id}`, {

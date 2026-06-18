@@ -691,54 +691,36 @@ height: 70px;
 }
 
 /* ==========================================================================
-   10. ADMIN DASHBOARD STYLES
+   10. ADMIN DASHBOARD STYLES (NUEVO)
    ========================================================================== */
 .admin-dashboard-header {
-  background-color: #1f2937;
+  background-color: #3b82f6;
   color: white;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
   border-radius: 8px;
-  margin-bottom: 2rem;
-}
-
-.admin-dashboard-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.admin-dashboard-logout-btn {
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.admin-dashboard-logout-btn:hover {
-  background-color: #dc2626;
+  margin-bottom: 1.5rem;
 }
 
 .admin-dashboard-content {
   width: 100%;
   max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-dashboard-content h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #374151;
 }
 
 .admin-dashboard-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   background-color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  margin-bottom: 2rem;
 }
 
 .admin-dashboard-table {
@@ -748,17 +730,15 @@ height: 70px;
 
 .admin-dashboard-table-header {
   background-color: #f3f4f6;
-  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  text-align: left;
 }
 
 .admin-dashboard-table-header-cell {
   padding: 1rem;
-  text-align: left;
-  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
   color: #374151;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 0.5px;
+  font-size: 0.875rem;
 }
 
 .admin-dashboard-table-row {
@@ -773,46 +753,42 @@ height: 70px;
 .admin-dashboard-table-cell {
   padding: 1rem;
   color: #374151;
-  font-size: 0.9rem;
-}
-
-.admin-dashboard-table-cell:first-child {
-  font-weight: 600;
+  font-size: 0.875rem;
 }
 
 .admin-dashboard-user-role {
-  background-color: #e5e7eb;
-  color: #374151;
+  display: inline-block;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  font-weight: 600;
+  background-color: #dbeafe;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
-.admin-dashboard-user-group {
-  color: #374151;
-  font-size: 0.9rem;
+.admin-dashboard-checkbox {
+  height: 1.25rem;
+  width: 1.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: #3b82f6;
 }
 
 .admin-dashboard-actions {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
 .admin-dashboard-action-btn {
   padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: none;
-  font-weight: 600;
+  border-radius: 4px;
+  font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.2s;
-  font-size: 0.9rem;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.875rem;
 }
 
 .admin-dashboard-edit-btn {
@@ -851,15 +827,6 @@ height: 70px;
   background-color: #4b5563;
 }
 
-.admin-dashboard-checkbox {
-  height: 1.25rem;
-  width: 1.25rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  cursor: pointer;
-  accent-color: #3b82f6;
-}
-
 .admin-dashboard-loading {
   display: flex;
   justify-content: center;
@@ -867,4 +834,160 @@ height: 70px;
   padding: 2rem;
   font-size: 1.25rem;
   color: #374151;
+  text-align: center;
+  width: 100%;
+}
+
+/* ==========================================================================
+   11. RESPONSIVE STYLES (MEDIA QUERIES)
+   ========================================================================== */
+
+/* Estilos para dispositivos medianos (tablets) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .admin-dashboard-content h2 {
+    font-size: 1.75rem;
+  }
+  
+  .admin-dashboard-table-header-cell {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .admin-dashboard-table-cell {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .admin-dashboard-action-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Estilos para dispositivos grandes (desktops) */
+@media (min-width: 1024px) {
+  .admin-dashboard-content h2 {
+    font-size: 2rem;
+  }
+  
+  .admin-dashboard-table-header-cell {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  .admin-dashboard-table-cell {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  .admin-dashboard-action-btn {
+    padding: 0.5rem 1.25rem;
+    font-size: 1rem;
+  }
+}
+
+/* Estilos para dispositivos muy grandes */
+@media (min-width: 1280px) {
+  .admin-dashboard-content h2 {
+    font-size: 2.25rem;
+  }
+  
+  .admin-dashboard-table-header-cell {
+    padding: 1.25rem;
+    font-size: 1.125rem;
+  }
+  
+  .admin-dashboard-table-cell {
+    padding: 1.25rem;
+    font-size: 1.125rem;
+  }
+}
+
+/* Estilos específicos para móviles */
+@media (max-width: 767px) {
+  .admin-dashboard-content {
+    padding: 0.5rem;
+  }
+  
+  .admin-dashboard-content h2 {
+    font-size: 1.375rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .admin-dashboard-table-container {
+    border-radius: 0;
+  }
+  
+  .admin-dashboard-table-header-cell {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .admin-dashboard-table-cell {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .admin-dashboard-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .admin-dashboard-action-btn {
+    width: 100%;
+    text-align: center;
+    padding: 0.5rem;
+  }
+  
+  .admin-dashboard-checkbox {
+    height: 1.5rem;
+    width: 1.5rem;
+  }
+}
+/* ==========================================================================
+   12. WAITING ROOM STYLES
+   ========================================================================== */
+.waiting-room-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: #f3f4f6;
+}
+
+.waiting-room-title {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;
+  color: #1f2937; /* text-gray-800 */
+  margin-bottom: 1.5rem;
+  text-align: center;
+  width: 100%;
+}
+
+.waiting-room-paragraph {
+  font-size: 1.125rem; /* text-gray-600 */
+  color: #4b5563; /* text-gray-600 */
+  margin-bottom: 2rem;
+  text-align: center;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.waiting-room-button {
+  background-color: #3b82f6; /* bg-blue-600 */
+  color: white;
+  padding: 0.5rem 1.5rem; /* px-6 py-2 */
+  border-radius: 0.5rem; /* rounded-lg */
+  font-weight: 500; /* font-medium */
+  cursor: pointer;
+  transition: background-color 0.2s; /* hover:bg-blue-700 */
+  border: none;
+  font-size: 1rem;
+}
+
+.waiting-room-button:hover {
+  background-color: #2563eb; /* hover:bg-blue-700 */
 }
