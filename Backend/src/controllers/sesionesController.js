@@ -1,12 +1,15 @@
 import * as SesionesService from '../services/SesionesService.js';
 
 export const obtenerTodasLasSesionesUsuario = async (req, res) => {
+    
     try {
         const user_id = req.params.UserId;
+        
         if (!user_id) return res.status(400).json({ error: 'ID de usuario no proporcionado' });
         
         const sesiones = await SesionesService.obtenerSesionesPorUsuario(user_id);
         res.json(sesiones);
+        
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener sesiones.', error: error.message });
     }
@@ -15,6 +18,7 @@ export const obtenerTodasLasSesionesUsuario = async (req, res) => {
 export const crearSesion = async (req, res) => {
     try {
         const { user_id, nombre, fecha_examen, duracion_diaria_estimada } = req.body;
+        
         if (!user_id || !nombre || !fecha_examen || !duracion_diaria_estimada) {
             return res.status(400).json({ message: "Faltan campos obligatorios" });
         }
@@ -53,6 +57,10 @@ export const obtenerTodasLasSesiones = async (req, res) => {
         res.status(500).json({ message: "Error al obtener sesiones", error: error.message });
     }
 };
+
+export const obtenerSesionesPorGrupoIdService = async (userId) => {
+    return await SesionesService.obtenerSesionesPorGrupoIdService(userId);
+}
 
 export const obtenerSesionPorId = async (req, res) => {
     try {
@@ -123,5 +131,27 @@ export const obtenerTareaDelDia = async (req, res) => {
         res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ message: "Error interno", error: error.message });
+    }
+};
+
+export const obtenerSesionesPorGrupoId = async (req, res) => {
+    try {
+        // Corregir la obtención del group_id
+        const group_id = req.params.group_id;  // El grupo viene como parámetro en la URL
+        
+        if (!group_id) {
+            return res.status(400).json({ 
+                message: "ID de grupo no proporcionado" 
+            });
+        }
+        
+        const result = await SesionesService.obtenerSesionesPorGrupoIdService(group_id);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error en obtenerSesionesPorGrupoId:", error);
+        res.status(500).json({ 
+            message: "Error al obtener sesiones por grupo", 
+            error: error.message 
+        });
     }
 };

@@ -12,6 +12,7 @@ const diasEntre = (start, end) => {
 };
 
 export const obtenerSesionesPorUsuario = async (userId) => {
+    
     return await Sesion.findAll({
         where: { user_id: userId },
         include: [{ model: Tarea, as: 'tareas' }],
@@ -23,7 +24,8 @@ export const obtenerSesionesPorUsuario = async (userId) => {
 };
 
 export const crearNuevaSesion = async (datos) => {
-    const { user_id, nombre, fecha_examen, duracion_diaria_estimada } = datos;
+    
+    const { user_id, nombre, fecha_examen, duracion_diaria_estimada, group_id } = datos;
     const t = await sequelize.transaction();
 
     try {
@@ -34,16 +36,26 @@ export const crearNuevaSesion = async (datos) => {
             throw new Error("La fecha de examen debe ser hoy o futura.");
         }
 
+        if (!group_id) {
+            throw new Error("El usuario no pertenece a ningún grupo. Asigna un grupo al usuario primero.");
+        }
+
+        
         const diasTotales = diasEntre(fechaInicio, fechaExamenDate);
         const diasDisponibles = diasTotales > 1 ? diasTotales - 1 : 1;
         const duracionTotalEstimada = duracion_diaria_estimada * diasDisponibles;
-
-        const nuevaSesion = await Sesion.create({
-            user_id, nombre, fecha_examen: fechaExamenDate,
-            duracion_diaria_estimada, duracion_total_estimada: duracionTotalEstimada,
-            es_completada: false, fecha_programada: fechaInicio,
+        try {
+            const nuevaSesion = await Sesion.create({
+            user_id, 
+            nombre, 
+            fecha_examen: fechaExamenDate,
+            //duracion_diaria_estimada, 
+            duracion_total_estimada: duracionTotalEstimada,
+            es_completada: false, 
+            fecha_programada: fechaInicio,
+            grupo_id: group_id
         }, { transaction: t });
-
+        
         let tiempoRestante = duracionTotalEstimada;
         let tareasProgramadas = [];
         let fechaActual = new Date(fechaInicio);
@@ -66,11 +78,20 @@ export const crearNuevaSesion = async (datos) => {
         await Tarea.bulkCreate(tareasProgramadas, { transaction: t });
         await t.commit();
         return { nuevaSesion, tareasCount: tareasProgramadas.length };
+        } catch (error) {
+            
+            await t.rollback();
+            throw error;
+        }
+        
     } catch (error) {
+        ("Error al crear sesión:", error); // Mover esta línea antes del throw
         await t.rollback();
         throw error;
     }
 };
+
+
 
 export const listarSesionesFull = async () => {
     return await Sesion.findAll({
@@ -99,6 +120,33 @@ export const borrarSesionCompleta = async (id) => {
         throw error;
     }
 };
+
+// Asegúrate de que esta función esté correctamente definida
+// En SesionesService.js
+export const obtenerSesionesPorGrupoIdService = async (group_id) => {
+    try {
+        if (!group_id || isNaN(group_id)) {
+            throw new Error('ID de grupo inválido');
+        }
+
+        const sesiones = await db.Sesion.findAll({
+            where: { grupo_id: group_id },
+            include: [
+                {
+                    model: db.Tarea,
+                    as: 'tareas'
+                }
+            ]
+        });
+
+        return sesiones;
+    } catch (error) {
+        console.error("Error en obtenerSesionesPorGrupoIdService:", error);
+        throw error;
+    }
+};
+
+
 
 export const buscarSesionActivaYHistorial = async (userId) => {
     const hoy = new Date().toISOString().split('T')[0];

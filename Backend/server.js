@@ -2,10 +2,11 @@
 import cors from 'cors';
 import authRouter from './src/routes/authroutes.js';
 import sesionesRouter from './src/routes/sesiones.routes.js';
-
+import groupRoutes from './src/routes/groupRoutes.js';
+import whitelistRoutes from './src/routes/whitelist.routes.js';
 import express from 'express';
-
-
+import adminRoutes from './src/routes/admin.routes.js';
+import userRoutes from './src/routes/users.routes.js';
 
 const app = express();
 
@@ -16,7 +17,7 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-app.get('backend/prueba', (req, res) => {
+app.get('/backend/prueba', (req, res) => {
     res.status(200).json({ 
         status: "OK", 
         message: "El servidor de Express está recibiendo peticiones correctamente." 
@@ -25,9 +26,14 @@ app.get('backend/prueba', (req, res) => {
 
 app.use('/backend', authRouter); 
 app.use('/backend/sesiones', sesionesRouter);
+app.use('/backend/groups', groupRoutes);
+app.use('/backend/whitelist', whitelistRoutes);
+app.use('/backend/admin', adminRoutes);
+app.use('/backend/user', userRoutes);
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     app.listen(3000, () => {
+        console.log('Servidor corriendo en el puerto 3000');
     });
 }
 

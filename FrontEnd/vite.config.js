@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, rootPath, '');
 
     // 2. Definimos el target para el proxy (solo se usa en desarrollo local)
-    // NOTA: Cambié el nombre a API_TARGET para que coincida con tu console.log
+    
     const API_TARGET = env.VITE_API_URL || 'http://localhost:3000';
 
     const envVariables = {
@@ -19,8 +19,7 @@ export default defineConfig(({ mode }) => {
         'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || '/backend'),
     };
 
-    console.log(`[Vite Config] Modo: ${mode}`);
-    console.log(`[Vite Config] API Target: ${API_TARGET}`); 
+
 
     return {
         plugins: [react(), tailwindcss()],
@@ -32,7 +31,7 @@ export default defineConfig(({ mode }) => {
                     changeOrigin: true,
                     configure: (proxy, options) => {
                         proxy.on('proxyReq', (proxyReq, req, res) => {
-                            console.log(`[PROXY] ${req.method} ${req.url} -> ${options.target}`);
+                            
                         });
                     }
                 }

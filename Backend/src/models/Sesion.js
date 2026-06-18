@@ -10,7 +10,11 @@ export default (sequelize) => {
         duracion_total_estimada: { type: DataTypes.INTEGER, allowNull: false },
         es_completada: { type: DataTypes.BOOLEAN, defaultValue: false },
         creado_en: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-        actualizado_en: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+        actualizado_en: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+        grupo_id: { type: DataTypes.INTEGER, allowNull: true, references: {
+    model: 'grupo',
+    key: 'id'
+  } }
     }, {
         tableName: 'sesiones',
         timestamps: false

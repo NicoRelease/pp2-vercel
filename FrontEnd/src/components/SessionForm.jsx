@@ -11,12 +11,13 @@ const NewSessionForm = ({ onSesionCreada }) => {
     nombre: '',
     fecha_examen: '',
     duracion_diaria_estimada: 60,
+    group_id: localStorage.getItem('group_id') || null
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null); 
-
   const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 
   // --- LÓGICA DE FECHAS LOCALES ---
   
@@ -45,6 +46,7 @@ const NewSessionForm = ({ onSesionCreada }) => {
     setFormData({ ...formData, [name]: value });
     if (error) setError(null);
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -75,7 +77,7 @@ const NewSessionForm = ({ onSesionCreada }) => {
       };
       
       const response = await axios.post(`${API_BASE_URL}/sesiones`, formData, config);
-
+      
       let mensajeExito = 'Sesión creada exitosamente!';
       
       if (response.data.sesion) {

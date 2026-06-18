@@ -7,7 +7,7 @@ import TareasPorFecha from './TareasPorFecha';
 import HeaderNoLink from './HeaderNoLink';
 import '../App.css';
 
-const GestorEstudio = () => {
+const GrupoResumen = () => {
   const [vistaActual, setVistaActual] = useState('sesiones'); // 'sesiones' o 'fechas'
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,8 +42,7 @@ const GestorEstudio = () => {
     }
 
     try {
-        const url = `${API_BASE_URL}/sesiones/user/${UserId}`;
-
+        const url = `${API_BASE_URL}/sesiones/grupo/${group_id}`;
         
         
         // Añadir timeout para mejor experiencia de usuario
@@ -100,7 +99,7 @@ const GestorEstudio = () => {
     try {
       // ✅ URL CORREGIDA: /sesiones/:id
       await axios.delete(`${API_BASE_URL}/sesiones/${sessionId}`, getConfig());
-
+      
       alert('Sesión eliminada con éxito.');
       fetchSesiones();
     } catch (err) {
@@ -239,4 +238,4 @@ const GestorEstudio = () => {
   );
 };
 
-export default GestorEstudio;
+export default GrupoResumen;
