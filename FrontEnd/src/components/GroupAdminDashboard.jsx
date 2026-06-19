@@ -16,7 +16,7 @@ export default function GroupAdminDashboard() {
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const API_BASE_URL = import.meta.env.VITE_API_URL;
     const token = localStorage.getItem('authToken');
-    const adminId = localStorage.getItem('userId');
+    const adminId = localStorage.getItem('UserId');
     const cleanAdminId = adminId ? adminId.trim().replace(/"/g, '') : null;
     const adminIdNum = Number(cleanAdminId);
     

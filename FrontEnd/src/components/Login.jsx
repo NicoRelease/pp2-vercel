@@ -40,9 +40,13 @@ export default function Login() {
      
       if (response.ok && data.token) {
         localStorage.setItem('authToken', data.token);
-        localStorage.setItem('UserId', data.user.id);
         localStorage.setItem('user', JSON.stringify(data.user));
         localStorage.setItem('userGroup', data.user.group_id);
+        const userid = data.user.id;
+        const cleanUserId = userid ? userid.trim().replace(/"/g, '') : null;
+        const UserId = Number(cleanUserId);
+        localStorage.setItem('UserId',UserId);
+
 
         const { rol_id, estado, group_id} = data.user;
         let groupResponse = null;
