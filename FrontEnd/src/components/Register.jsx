@@ -63,6 +63,10 @@ export default function Register() {
             localStorage.setItem('authToken', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('userId', JSON.stringify(data.user.id));
+            const userid = data.user.id;
+            const cleanUserId = userid ? userid.trim().replace(/"/g, '') : null;
+            const UserId = Number(cleanUserId);
+            localStorage.setItem('UserId',UserId);
             alert('¡Registro exitoso!');
             
             // Redirección por Rol
