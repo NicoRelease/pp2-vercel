@@ -1,7 +1,6 @@
-import db from '../models/index.js'; 
+import db from '../models/index.js';
 import bcrypt from 'bcrypt'; 
 import jwt from 'jsonwebtoken'; 
-//import admincontroller from '../controllers/admin.controller.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'clave_jwt_por_defecto';
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || 10, 10);
@@ -30,46 +29,54 @@ export const loginUser = async (userIdentifier, password) => {
             ]
         }
     });
+    console.log("datos devueltos de la consulta: ",user);
     
-    
-    console.log ("datos del usuario al momento del login:",user.id, user.estado, user.group_id)
+    console.log ("datos del usuario al momento del login:",user?.id, user?.estado, user?.group_id);
 
-    if (!user || !(await user.validPassword(cleanPassword))) {
+    // Verificar si el usuario existe
+    if (!user) {
+        console.log("user es null");
         const error = new Error("Credenciales inválidas. Usuario o contraseña incorrectos.");
         error.status = 401; 
         throw error;
     }
+
+    // Validar contraseña
+    if (!(await user.validPassword(cleanPassword))) {
+        const error = new Error("Credenciales inválidas. Usuario o contraseña incorrectos.");
+        error.status = 401; 
+        throw error;
+    }
+
     if (user.rol_id === 3) {
-            // Para rol 3, buscar en GrupoLista
-            const grupoAsociado = await db.GrupoLista.findOne({
-                where: {
-                    email: { [db.Op.like]: `%${cleanIdentifier}%` }
-                }
-            });
-            console.log ("grupoAsociado:",grupoAsociado)
-            if (grupoAsociado) {
-                user.group_id = grupoAsociado.grupo_id;
-                user.estado = true; 
-            } else {
-                // Para usuarios de rol 3 que no están en GrupoLista:
-                // Se permite el registro pero sin grupo asignado y con estado pendiente
-                user.group_id = null;
-                user.estado = false; 
+        // Para rol 3, buscar en GrupoLista
+        console.log("Entra en este if:2");
+        const grupoAsociado = await db.GrupoLista.findOne({
+            where: {
+                email: { [db.Op.like]: `%${cleanIdentifier}%` }
             }
+        });
+        console.log ("grupoAsociado:",grupoAsociado)
+        if (grupoAsociado) {
+            user.group_id = grupoAsociado.grupo_id;
+            user.estado = true; 
+        } else {
+            // Para usuarios de rol 3 que no están en GrupoLista:
+            // Se permite el registro pero sin grupo asignado y con estado pendiente
+            user.group_id = null;
+            user.estado = false; 
         }
-    //if (user && user.estado === false ){
-    //    const respuesta = admincontroller.updateUserAdmin()
-    //}
+    }
+
     if (user.id && user.estado === false) {
+        console.log("Entra en este if:3");
         const error = new Error("Acceso denegado. Tu cuenta está inactiva o pendiente de aprobación.");
         error.status = 403; 
         throw error;
     }
     
-    
-
     const token = generateToken(user);
-console.log ("datos actualizados de usuario: ",user)
+    console.log ("datos actualizados de usuario: ",user);
     return { 
         user: { 
             id: user.id, 
@@ -204,4 +211,4 @@ export const registerUser = async (username, email, plainPassword, selectedRolId
         }, 
         token 
     };
-};
+}
