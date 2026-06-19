@@ -52,7 +52,7 @@ export default function Register() {
             });
             
             const data = await response.json();
-            console.log ("Respuesta del registro:",data)
+            
             
             if (!response.ok) {
                 setError(data.error || 'Error en el registro.');
