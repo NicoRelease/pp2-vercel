@@ -113,6 +113,9 @@ const AdminDashboard = () => {
             setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...editForm } : u));
             setEditingUser(null);
             alert('Usuario actualizado correctamente');
+            
+            // Refrescar datos para mostrar los cambios actualizados
+            fetchData();
         } catch (error) {
             console.error("Error saving edit:", error);
             alert("Error al actualizar usuario");
@@ -203,7 +206,7 @@ const AdminDashboard = () => {
                                             </select>
                                         ) : (
                                             <span className="admin-dashboard-user-group">
-                                                {user.grupo?.nombre || 'Sin grupo'}
+                                                {user.grupo?.nombre_grupo || 'Sin grupo'}
                                             </span>
                                         )}
                                     </td>

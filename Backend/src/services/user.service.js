@@ -31,7 +31,7 @@ export const getAllUsers = async () => {
 export const updateUser = async (userId, userData) => {
     const user = await db.User.findByPk(userId);
     if (!user) throw new Error("Usuario no encontrado");
-
+console.log ("info del usuario que va a usar para actualizar: ",userData)
     // Actualiza los campos del usuario
     Object.assign(user, userData);
     await user.save();

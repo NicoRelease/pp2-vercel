@@ -6,8 +6,8 @@ import CryptoJS from 'crypto-js';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [loginUser, setLoginUser] = useState("sys.admin@correo.com");
-  const [loginPassword, setLoginPassword] = useState("1234");
+  const [loginUser, setLoginUser] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(""); 
   
