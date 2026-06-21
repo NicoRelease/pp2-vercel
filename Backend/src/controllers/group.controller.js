@@ -41,6 +41,7 @@ export const getAllMyGroups = async (req, res) => {
     }
 };
 
+
 // 2. CREAR O ACTUALIZAR
 export const manageGroup = async (req, res) => {
     console.log ("Datos del body",req.body);
@@ -206,4 +207,37 @@ export const getGroupById = async (req, res) => {
         res.status(500).json({ message: "Error al obtener los usuarios del grupo" });
     }
     
+};
+
+// 6. OBTENER grupos
+export const getAll = async (req, res) => {
+    console.log ("Datos del body",req.params);
+    try {
+        
+        
+        const grupos = await db.Grupo.findAll({ 
+            order: [['created_at', 'DESC']],
+            include: [{
+                model: db.GrupoLista,
+                attributes: ['email', 'grupo_id'],
+                as: 'emails'
+            }]
+        });
+        console.log("info a query grupos", grupos)
+        // Procesar los resultados para incluir los emails en formato adecuado
+        
+        //const gruposConEmails = grupos.map(grupo => {
+        //    const grupoData = grupo.toJSON();
+        //    const emails = grupoData.emails ? grupoData.emails.map(emailObj => emailObj.email) : [];
+        //    return {
+        //        ...grupoData,
+        //        emails: emails // Añadir el campo emails como array
+        //    };
+        //});
+        
+        res.status(200).json(grupos);
+    } catch (error) {
+        console.error("Error al listar grupos:", error);
+        res.status(500).json({ message: "Error al obtener la lista de grupos" });
+    }
 };

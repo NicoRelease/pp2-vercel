@@ -21,29 +21,47 @@ const AdminDashboard = () => {
         try {
             const token = localStorage.getItem('authToken');
             
+            // Use the correct API endpoint for groups
             const [usersRes, groupsRes] = await Promise.all([
                 fetch('/backend/admin/users', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch('/backend/admin/groups', { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch('/backend/groups/all', { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
             
-            setUsers(await usersRes.json());
-            setGroups(await groupsRes.json());
+            // Check if responses are ok
+            if (!usersRes.ok) {
+                throw new Error(`Failed to fetch users: ${usersRes.status}`);
+            }
+            console.log("datos recibidos en bruto del back: ",groupsRes)
+            if (!groupsRes.ok) {
+                throw new Error(`Failed to fetch groups: ${groupsRes.status}`);
+            }
+            
+            const usersData = await usersRes.json();
+            const groupsData = await groupsRes.json();
+            console.log("datos en json del back: ",groupsData)
+            setUsers(usersData);
+            setGroups(groupsData);
             setLoading(false);
+            console.log("Info Seteada",groups)
         } catch (error) {
             console.error("Error cargando datos:", error);
+            alert("Error al cargar los datos. Por favor, inténtelo de nuevo.");
+            setLoading(false);
         }
     };
 
     // Función para actualizar usuario en la DB
     const handleUpdate = async (userId, field, value) => {
         const user = users.find(u => u.id === userId);
+        if (!user) return;
+        
         const updatedData = {
             group_id: field === 'group_id' ? value : user.group_id,
             estado: field === 'estado' ? value : user.estado
         };
 
         try {
-            await fetch(`/backend/admin/users/${userId}`, {
+            const response = await fetch(`/backend/admin/users/${userId}`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -51,10 +69,16 @@ const AdminDashboard = () => {
                 },
                 body: JSON.stringify(updatedData)
             });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to update user: ${response.status}`);
+            }
+            
             // Actualizar estado local para feedback inmediato
             setUsers(users.map(u => u.id === userId ? { ...u, [field]: value } : u));
         } catch (error) {
-            alert("Error al actualizar");
+            console.error("Error updating user:", error);
+            alert("Error al actualizar el usuario");
         }
     };
 
@@ -72,7 +96,7 @@ const AdminDashboard = () => {
         if (!editingUser) return;
         
         try {
-            await fetch(`/backend/admin/users/${editingUser.id}`, {
+            const response = await fetch(`/backend/admin/users/${editingUser.id}`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -81,11 +105,16 @@ const AdminDashboard = () => {
                 body: JSON.stringify(editForm)
             });
             
+            if (!response.ok) {
+                throw new Error(`Failed to update user: ${response.status}`);
+            }
+            
             // Actualizar estado local
             setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...editForm } : u));
             setEditingUser(null);
             alert('Usuario actualizado correctamente');
         } catch (error) {
+            console.error("Error saving edit:", error);
             alert("Error al actualizar usuario");
         }
     };
@@ -100,16 +129,21 @@ const AdminDashboard = () => {
         if (!window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) return;
         
         try {
-            await fetch(`/backend/admin/users/${userId}`, {
+            const response = await fetch(`/backend/admin/users/${userId}`, {
                 method: 'DELETE',
                 headers: { 
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                 }
             });
             
+            if (!response.ok) {
+                throw new Error(`Failed to delete user: ${response.status}`);
+            }
+            
             setUsers(users.filter(u => u.id !== userId));
             alert('Usuario eliminado correctamente');
         } catch (error) {
+            console.error("Error deleting user:", error);
             alert("Error al eliminar usuario");
         }
     };
@@ -164,7 +198,7 @@ const AdminDashboard = () => {
                                             >
                                                 <option value="">Sin Grupo</option>
                                                 {groups.map(g => (
-                                                    <option key={g.id} value={g.id}>{g.nombre}</option>
+                                                    <option key={g.id} value={g.id}>{g.nombre_grupo}</option>
                                                 ))}
                                             </select>
                                         ) : (
