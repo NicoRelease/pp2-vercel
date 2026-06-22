@@ -38,7 +38,7 @@ const HeaderNoLink = () => {
   let linksToRender;
   if (isHomePage || isLoginPage || isRegisterPage || isAdminDashboard || isGroupAdmin) {
     // Para la página de inicio, login, register, admin-dashboard y group-admin, no mostramos links
-    linksToRender = [];
+    linksToRender = authNavLinks;
   } else {
     // Para todas las demás páginas, mostramos los links normales
     linksToRender = mainNavLinks;
