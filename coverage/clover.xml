@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1781815098266" clover="3.2.0">
-  <project timestamp="1781815098266" name="All files">
+<coverage generated="1782139092943" clover="3.2.0">
+  <project timestamp="1782139092943" name="All files">
     <metrics statements="104" coveredstatements="59" conditionals="30" coveredconditionals="8" methods="12" coveredmethods="5" elements="146" coveredelements="72" complexity="0" loc="104" ncloc="104" packages="1" files="1" classes="1"/>
     <file name="SesionesService.js" path="D:\Terciario\PP2-Vercel\pp2-vercel\Backend\src\services\SesionesService.js">
       <metrics statements="104" coveredstatements="59" conditionals="30" coveredconditionals="8" methods="12" coveredmethods="5"/>

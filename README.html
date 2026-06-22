@@ -74,7 +74,7 @@
 
     <div class="info-box">
         <strong>🌐 Deploy en Producción:</strong> 
-        <a href="TU_URL_DE_VERCEL_AQUÍ" target="_blank">Visitar Aplicación en Vercel</a>
+        <a href="https://pp2-vercel.vercel.app/" target="_blank">Visitar Aplicación en Vercel</a>
     </div>
 
     <h2>📊 Estado del Proyecto (Code Coverage)</h2>
@@ -89,19 +89,19 @@
         <tbody>
             <tr>
                 <td>Test Suites</td>
-                <td>2 passed, 2 total</td>
+                <td>1 passed, 1 total</td>
             </tr>
             <tr>
                 <td>Tests</td>
-                <td>10 passed, 10 total</td>
+                <td>7 passed, 7 total</td>
             </tr>
             <tr>
                 <td><strong>Cobertura de Sentencias (% Stmts)</strong></td>
-                <td><span class="badge">58.16%</span></td>
+                <td><span class="badge">55.35%</span></td>
             </tr>
             <tr>
                 <td><strong>Cobertura de Líneas (% Lines)</strong></td>
-                <td><span class="badge">60.00%</span></td>
+                <td><span class="badge">56.73%</span></td>
             </tr>
         </tbody>
     </table>
@@ -124,32 +124,75 @@
 
     <h3>2. Instalación de Dependencias</h3>
     <p>Instale los módulos de Node necesarios para el proyecto:</p>
-    <pre>npm install</pre>
+    
+    <h4>Backend:</h4>
+    <pre>cd Backend
+npm install</pre>
+    
+    <h4>Frontend:</h4>
+    <pre>cd FrontEnd
+npm install</pre>
 
-    <h3>3. Configuración de Vercel Environment</h3>
-    <p>Este proyecto está integrado nativamente con <strong>Vercel</strong> para el despliegue de Serverless Functions.</p>
-    <ol>
-        <li>Instalar Vercel CLI globalmente: <code>npm i -g vercel</code></li>
-        <li>Iniciar sesión: <code>vercel login</code></li>
-        <li>Vincular proyecto: <code>vercel link</code></li>
-        <li>Descargar variables de entorno: <code>vercel env pull</code></li>
-    </ol>
+    <h3>3. Configuración de Variables de Entorno</h3>
+    <p>Debe crear los archivos de configuración necesarios:</p>
+    <ul>
+        <li><code>.env.local</code> en la raíz del proyecto (contiene variables globales)</li>
+        <li><code>.env.local</code> en la carpeta <code>Backend/</code> (variables específicas de backend)</li>
+        <li><code>.env.local</code> en la carpeta <code>FrontEnd/</code> (variables específicas de frontend)</li>
+    </ul>
 
     <h3>4. Ejecución en modo Desarrollo</h3>
-    <p>Para iniciar la aplicación localmente utilizando el motor de Vercel:</p>
-    <pre>vercel dev</pre>
-    <p>El servidor se iniciará típicamente en <code>http://localhost:3000</code>.</p>
+    <p>Para iniciar el backend:</p>
+    <pre>cd Backend
+npm run dev</pre>
+    
+    <p>Para iniciar el frontend:</p>
+    <pre>cd FrontEnd
+npm run dev</pre>
 
     <h2>🧪 Pruebas Unitarias</h2>
     <p>Para ejecutar la suite de tests y generar el reporte de cobertura en consola:</p>
-    <pre>npm test</pre>
+    
+    <h4>Backend:</h4>
+    <pre>cd Backend
+npm test</pre>
+    
+    <h4>Frontend:</h4>
+    <pre>cd FrontEnd
+npm run test</pre>
 
-    <h2>📁 Documentación Adicional</h2>
-    <p>Para más detalles sobre el diseño de software, consulte el <strong>Informe Técnico PDF</strong> que incluye:</p>
+    <h2>📁 Estructura del Proyecto</h2>
+    <pre>
+.
+├── Backend/                 # Servidor Express con controladores, rutas y modelos
+│   ├── api/                 # Rutas de la API
+│   ├── controllers/         # Controladores de la API
+│   ├── models/              # Modelos de datos con Sequelize
+│   ├── routes/              # Rutas de la API
+│   ├── services/            # Lógica de negocio
+│   ├── middleware/          # Middlewares de autenticación y validación
+│   ├── config/              # Configuración de base de datos
+│   ├── src/                 # Código fuente del backend
+│   └── index.js             # Punto de entrada del servidor
+├── FrontEnd/                # Aplicación React
+│   ├── public/
+│   ├── src/
+│   │   ├── components/      # Componentes reutilizables
+│   │   ├── pages/           # Páginas principales
+│   │   ├── services/        # Servicios para llamadas API
+│   │   └── App.jsx          # Componente raíz
+│   └── package.json         # Dependencias del frontend
+├── .env.local               # Variables de entorno locales
+├── package.json             # Dependencias y scripts del proyecto raíz
+└── README.md                # Documentación del proyecto
+    </pre>
+
+    <h2>👥 Usuarios de Prueba</h2>
+    <p>Los siguientes usuarios pueden utilizarse para probar la funcionalidad de la aplicación:</p>
     <ul>
-        <li>Diagrama de Entidad-Relación (DER).</li>
-        <li>Análisis de Casos de Uso.</li>
-        <li>Descripción de la Capa de Servicios y Manejo de Errores.</li>
+        <li><strong>Participante:</strong> <code>uno.usuario@correo.com</code></li>
+        <li><strong>Administrador de Grupo:</strong> <code>group.admin@correo.com</code></li>
+        <li><strong>Administrador de Sistema:</strong> <code>sys.admin@correo.com</code></li>
     </ul>
 
     <hr style="margin-top: 50px; border: 0; border-top: 1px solid #eee;">
