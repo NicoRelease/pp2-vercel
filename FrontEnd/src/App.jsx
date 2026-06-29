@@ -14,6 +14,7 @@ import GroupResume from './components/GrupoResumen';
 import AdminDashboard from './components/AdminDashboard';
 import GroupAdminDashboard from './components/GroupAdminDashboard'; 
 import WaitingRoom from './components/WaitingRoom'; 
+import DirectAccessError from './components/DirectAccessError';
 
 // Importar protección de rutas
 import ProtectedRoute from './components/ProtectedRoute';
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/Login" element={<Login />} />
             <Route path="/Register" element={<Register />} />
+            <Route path="/error-directo" element={<DirectAccessError />} />
             
             {/* Rutas Protegidas de Administración y Onboarding */}
             <Route path="/admin-dashboard" element={
@@ -39,7 +41,7 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/group-admin" element={
-              <ProtectedRoute allowedRoles={[2, 3]}>
+              <ProtectedRoute allowedRoles={[1, 2]}>
                 <GroupAdminDashboard />
               </ProtectedRoute>
             } />

@@ -17,20 +17,21 @@ const EditSesion = ({ sesion, onSaved, onCancel }) => {
   // Estados para el recálculo y visualización de métricas
   const [diasRestantes, setDiasRestantes] = useState(0);
   const [tiempoDiarioEstimado, setTiempoDiarioEstimado] = useState(0);
-  const [ritmoActualMinutoDia, setRitmoActualMinutoDia] = useState(null);
+  const [minDuracion, setMinDuracion] = useState(60);
 
-  // Calcular ritmo inicial al montar o cambiar fecha/duración significativamente
+  // Calcular tiempo de tareas completadas y mínimo de duración al montar
   useEffect(() => {
-    if (sesion.fecha_examen && sesion.duracion_total_estimada) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const examDate = new Date(sesion.fecha_examen);
-      const diffTime = examDate - today;
-      const daysDiff = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (sesion.tareas) {
+      const tareasCompletadas = sesion.tareas.filter(t => t.es_completada === true);
+      const tiempoCompletado = tareasCompletadas.reduce((sum, t) => sum + (Number(t.duracion_estimada) || 0), 0);
       
-      if (daysDiff > 0) {
-        const ritmoInicial = sesion.duracion_total_estimada / daysDiff;
-        setRitmoActualMinutoDia(ritmoInicial);
+      // Regla: mínimo 1 hora O el tiempo ya completado, lo que sea mayor
+      const minVal = Math.max(60, tiempoCompletado);
+      setMinDuracion(minVal);
+
+      // Ajustar duración actual si es menor al nuevo mínimo
+      if (formData.duracion_total_estimada < minVal) {
+        setFormData(prev => ({ ...prev, duracion_total_estimada: minVal }));
       }
     }
   }, [sesion]);
@@ -42,19 +43,20 @@ const EditSesion = ({ sesion, onSaved, onCancel }) => {
       today.setHours(0, 0, 0, 0);
       
       const examDate = new Date(formData.fecha_examen);
-      const diffTime = examDate - today;
-      const daysDiff = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // Ajustar zona horaria para comparar fechas correctamente
+      const userTimezoneOffset = today.getTimezoneOffset() * 60000;
+      const adjustedExamDate = new Date(examDate.getTime() + userTimezoneOffset);
+
+      const diffTime = adjustedExamDate - today;
+      let daysDiff = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      // Si es hoy mismo, contar como 1 día disponible para evitar división por cero
+      if (daysDiff < 1) daysDiff = 1;
 
       setDiasRestantes(daysDiff);
 
-      if (daysDiff > 0) {
-        const dailyMinutes = formData.duracion_total_estimada / daysDiff;
-        setTiempoDiarioEstimado(dailyMinutes.toFixed(1));
-      } else if (daysDiff === 0) {
-        setTiempoDiarioEstimado(formData.duracion_total_estimada); 
-      } else {
-        setTiempoDiarioEstimado(Infinity);
-      }
+      const dailyMinutes = formData.duracion_total_estimada / daysDiff;
+      setTiempoDiarioEstimado(dailyMinutes.toFixed(1));
     }
   }, [formData.fecha_examen, formData.duracion_total_estimada]);
 
@@ -64,7 +66,11 @@ const EditSesion = ({ sesion, onSaved, onCancel }) => {
     if (name === 'fecha_examen') {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const selectedDate = new Date(value);
+        
+        // Ajustar fecha seleccionada para evitar problemas de zona horaria
+        const selectedDateRaw = new Date(value);
+        const userTimezoneOffset = today.getTimezoneOffset() * 60000;
+        const selectedDate = new Date(selectedDateRaw.getTime() + userTimezoneOffset);
         
         // Validación: fecha no puede ser menor a la actual
         if (selectedDate < today) {
@@ -73,29 +79,25 @@ const EditSesion = ({ sesion, onSaved, onCancel }) => {
         }
 
         const diffTime = selectedDate - today;
-        const newDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        let newDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (newDays < 1) newDays = 1;
+
+        // Recálculo automático: Mantener ritmo constante de estudio basado en carga diaria actual
+        const currentDailyLoad = diasRestantes > 0 ? formData.duracion_total_estimada / Math.max(1, diasRestantes) : formData.duracion_total_estimada;
         
-        if (newDays > 0) {
-            // Recálculo automático: Mantener ritmo constante de estudio
-            // Si es la primera vez que se calcula el ritmo, usamos los datos originales de la sesión
-            const baseRitmo = ritmoActualMinutoDia || (formData.duracion_total_estimada / Math.max(1, diasRestantes));
-            
-            // Nuevo Total = Ritmo Base * Nuevos Días
-            const newDuration = Math.round(baseRitmo * newDays);
-            
-            setFormData(prev => ({ ...prev, [name]: value, duracion_total_estimada: newDuration }));
-            setError(null);
-        } else {
-            // Si es hoy mismo (0 días restantes), la duración mínima es lo que queda del día o se ajusta a 0 si ya pasó
-            setFormData(prev => ({ ...prev, [name]: value }));
-            setError("Fecha seleccionada es hoy. Se ajustará a carga diaria máxima.");
-        }
+        // Nuevo Total = Carga Diaria Actual * Nuevos Días (redondeado al entero más cercano)
+        const newDuration = Math.round(currentDailyLoad * newDays);
+        
+        setFormData(prev => ({ ...prev, [name]: value, duracion_total_estimada: newDuration }));
+        setError(null);
     } else {
       // Para otros campos (nombre), actualización directa
       if (name === 'duracion_total_estimada') {
           const numVal = Number(value);
-          if (numVal < 10) {
-              setError("La duración mínima estimada es de 10 minutos.");
+          
+          // Validar que la duración no sea menor al mínimo calculado
+          if (numVal < minDuracion) {
+              setError(`La duración mínima estimada es de ${minDuracion} minutos (basado en tareas completadas o 1 hora base).`);
               return;
           }
       }
@@ -110,16 +112,18 @@ const EditSesion = ({ sesion, onSaved, onCancel }) => {
     // Validación final robusta
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const selectedDate = new Date(formData.fecha_examen);
+    const selectedDateRaw = new Date(formData.fecha_examen);
+    const userTimezoneOffset = today.getTimezoneOffset() * 60000;
+    const selectedDate = new Date(selectedDateRaw.getTime() + userTimezoneOffset);
 
     if (selectedDate < today) {
       setError("La fecha seleccionada es inválida (no puede ser en el pasado).");
       return;
     }
     
-    // Validar que la duración no sea menor a un umbral seguro dado los días restantes
-    if (diasRestantes > 0 && formData.duracion_total_estimada < diasRestantes * 5) {
-        setError("La duración estimada es muy baja para la cantidad de días disponibles.");
+    // Validar que la duración cumpla con el mínimo
+    if (formData.duracion_total_estimada < minDuracion) {
+        setError(`La duración debe ser al menos ${minDuracion} minutos.`);
         return;
     }
 
@@ -139,7 +143,7 @@ const EditSesion = ({ sesion, onSaved, onCancel }) => {
         }
       });
 
-      setSuccessMessage('Sesión actualizada y tiempos recalculados correctamente');
+      setSuccessMessage('Sesión actualizada y plan recalculado correctamente');
       
       // Callback para notificar al padre y cerrar el modal/actualizar lista
       setTimeout(() => onSaved(sesion.id), 1500); 
@@ -153,7 +157,7 @@ const EditSesion = ({ sesion, onSaved, onCancel }) => {
 
   return (
     <div className="Tarjeta-Principal">
-      <HeaderNoLink />
+      
       
       <div style={{ maxWidth: '500px', margin: '20px auto', padding: '25px', background: '#fff', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
         <h3 style={{ color: '#007bff', marginBottom: '20px' }}>Editar Sesión y Recalcular Plan</h3>
@@ -197,14 +201,14 @@ const EditSesion = ({ sesion, onSaved, onCancel }) => {
              
              <p style={{margin:'5px 0', fontSize:'0.9rem'}}><strong>Días restantes hasta el examen:</strong> {diasRestantes > 0 ? diasRestantes : 0}</p>
              
-             {diasRestantes > 0 && (
+             {diasRestantes >= 1 && (
                  <>
                     <div style={{ marginBottom: '15px' }}>
                         <label><strong>Tiempo Total Estimado (minutos):</strong></label>
                         {/* Input editable pero que se ajusta si cambia la fecha */}
                          <input 
                             type="number" name="duracion_total_estimada" value={formData.duracion_total_estimada} onChange={handleChange} 
-                            min="10" required className="form-control" 
+                            min={minDuracion} required className="form-control" 
                             style={{width:'100%', padding:'8px', marginTop: '5px', borderRadius:'4px', border:'1px solid #ccc'}} 
                         />
                     </div>

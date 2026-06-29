@@ -223,11 +223,13 @@ const GestorEstudio = () => {
       <div className="Tarjeta-Principal">
         <HeaderNoLink />
         
-        {/* Header de navegación */}
-        <HeaderNavegacion 
-          vistaActual={vistaActual}
-          onCambiarVista={setVistaActual}
-        />
+        {/* Header de navegación: SOLO se muestra si NO estamos editando */}
+        {!editingSession && (
+          <HeaderNavegacion 
+            vistaActual={vistaActual}
+            onCambiarVista={setVistaActual}
+          />
+        )}
         
         {/* Contenido según vista seleccionada */}
         {editingSession ? (

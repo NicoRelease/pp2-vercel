@@ -118,14 +118,27 @@ export const obtenerSesionActiva = async (req, res) => {
 };
 
 export const gestionarTarea = async (req, res) => {
-    const { action, tiempo_ejecutado } = req.body;
-    if (!['start', 'pause', 'stop'].includes(action)) {
-        return res.status(400).json({ message: "Acción no válida." });
+    const { action, tiempo_ejecutado, notas } = req.body;
+
+    // Validación flexible: Si es 'note', no requiere acción de timer estricta ni tiempo válido
+    if (!action && !notas) {
+        return res.status(400).json({ message: "Acción o nota requerida." });
     }
+
     try {
-        const tarea = await SesionesService.ejecutarGestionTarea(req.params.id, action, tiempo_ejecutado);
+        // Validar tiempo solo si es una acción de timer (start, pause, stop)
+        let tiempoValido = 0;
+        if (['start', 'pause', 'stop'].includes(action)) {
+            if (typeof tiempo_ejecutado !== 'number' || isNaN(tiempo_ejecutado) || tiempo_ejecutado < 0) {
+                return res.status(400).json({ message: "El campo 'tiempo_ejecutado' debe ser un número válido." });
+            }
+            tiempoValido = tiempo_ejecutado;
+        }
+
+        const tarea = await SesionesService.ejecutarGestionTarea(req.params.id, action || '', tiempoValido, notas);
         res.status(200).json({ tarea });
     } catch (error) {
+        console.error('[gestionarTarea] Error:', error.message);
         const status = error.message === "Tarea no encontrada" ? 404 : 500;
         res.status(status).json({ message: error.message });
     }
@@ -179,5 +192,32 @@ export const obtenerSesionesPorGrupoId = async (req, res) => {
             message: "Error al obtener sesiones por grupo", 
             error: error.message 
         });
+    }
+};
+
+export const actualizarNotasTarea = async (req, res) => {
+    try {
+        const { notas } = req.body;
+        if (notas === undefined || notas === null) {
+            return res.status(400).json({ message: "El campo 'notas' es requerido" });
+        }
+        if (typeof notas !== 'string' || notas.length > 10000) {
+            return res.status(400).json({ message: "Las notas deben ser un string de máximo 10,000 caracteres" });
+        }
+
+        const tarea = await SesionesService.actualizarNotasTarea(req.params.id, notas);
+        if (!tarea) {
+            return res.status(404).json({ message: "Tarea no encontrada" });
+        }
+        res.status(200).json({ 
+            message: "Nota guardada correctamente", 
+            tarea 
+        });
+    } catch (error) {
+        console.error("[actualizarNotasTarea] Error:", error.message);
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({ message: 'Error de validación', errors: error.errors });
+        }
+        res.status(500).json({ message: "Error al guardar la nota", error: error.message });
     }
 };

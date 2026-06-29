@@ -10,6 +10,7 @@ export const protect = async (req, res, next) => {
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
         token = authHeader.split(' ')[1];
+        
         try {
             const decoded = jwt.verify(token, JWT_SECRET);
             
@@ -47,6 +48,7 @@ export const authorizeRoles = (...allowedRoles) => {
 };
 
 // 3. NUEVO: Verificación de Propiedad del Recurso (Ownership)
+// Soporta recursos directos (Sesion, User) e indirectos (Tarea -> Sesion -> user_id)
 export const checkOwnership = (modelName, ownerField = 'user_id') => {
     return async (req, res, next) => {
         try {
@@ -56,25 +58,56 @@ export const checkOwnership = (modelName, ownerField = 'user_id') => {
             const Model = db[modelName];
             if (!Model) throw new Error(`Modelo ${modelName} no encontrado`);
 
-            const resource = await Model.findByPk(req.params.id, { 
-                attributes: [ownerField]
-            });
+            let resource;
 
-            if (!resource) return res.status(404).json({ error: 'Recurso no encontrado' });
+            // CASO ESPECIAL: Tarea (no tiene user_id directo, pertenece a una Sesion)
+            if (modelName === 'Tarea') {
+                const Tarea = db.Tarea;
+                const Sesion = db.Sesion;
 
-            // Validamos que el ID del usuario logueado coincida con el dueño del recurso
-            if (String(resource[ownerField]) !== String(req.user.id)) {
-                return res.status(403).json({ 
-                    error: `No tienes permiso para modificar este recurso. El propietario es otro usuario.` 
+                resource = await Tarea.findByPk(req.params.id, {
+                    include: [
+                        { model: Sesion, as: 'sesion', attributes: ['user_id'] }
+                    ]
                 });
+
+                if (!resource) return res.status(404).json({ error: 'Tarea no encontrada' });
+
+                // Verificar propiedad a través de la sesión padre
+                const sesionUserId = resource.sesion?.user_id;
+                if (String(sesionUserId) !== String(req.user.id)) {
+                    return res.status(403).json({ 
+                        error: 'No tienes permiso para modificar esta tarea. Pertenece a otro usuario.'
+                    });
+                }
+            } else {
+                // CASO GENERAL: Recurso con user_id directo (Sesion, User, etc.)
+                resource = await Model.findByPk(req.params.id, { 
+                    attributes: [ownerField]
+                });
+
+                if (!resource) return res.status(404).json({ error: 'Recurso no encontrado' });
+
+                // Validamos que el ID del usuario logueado coincida con el dueño del recurso
+                if (String(resource[ownerField]) !== String(req.user.id)) {
+                    return res.status(403).json({ 
+                        error: `No tienes permiso para modificar este recurso. El propietario es otro usuario.`
+                    });
+                }
             }
-            
+
             // Adjuntamos el recurso completo al request para evitar reconsultas en el controlador
-            req.resource = await Model.findByPk(req.params.id);
+            req.resource = await Model.findByPk(req.params.id, {
+                include: modelName === 'Tarea' ? [{ model: db.Sesion, as: 'sesion' }] : []
+            });
+            
             next();
         } catch (error) {
             console.error(`[checkOwnership] Error:`, error.message);
-            res.status(500).json({ error: 'Error interno validando propiedad' });
+            res.status(500).json({ 
+                error: 'Error interno validando propiedad', 
+                detail: error.message 
+            });
         }
     };
 };

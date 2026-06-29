@@ -14,6 +14,10 @@ const TareaManager = () => {
   const [estaActiva, setEstaActiva] = useState(false);
   const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
 
+  // NUEVO: Estados para las notas
+  const [nota, setNota] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const autosaveIntervalRef = useRef(null);
 
@@ -34,6 +38,11 @@ const TareaManager = () => {
       setSesion(res.data.sesion);
       setTiempoTranscurrido(tiempoFinal);
       localStorage.setItem(`temp_time_${tareaId}`, tiempoFinal);
+
+      // Cargar nota existente si la hay
+      if (res.data.notas) {
+        setNota(res.data.notas);
+      }
     } catch (err) {
       console.error("Error de sincronización:", err);
     }
@@ -81,17 +90,41 @@ const TareaManager = () => {
     const tiempoSnapshot = tiempoTranscurrido;
     setEstaActiva(false);
     try {
+      // Validar que tiempo_ejecutado sea un número válido para evitar error 500
+      const tiempoValido = (typeof tiempoSnapshot === 'number' && !isNaN(tiempoSnapshot)) ? tiempoSnapshot : 0;
+      
       const res = await axios.post(`${API_BASE_URL}/sesiones/tareas/${tareaId}/gestionar`, 
-        { action: accion, tiempo_ejecutado: tiempoSnapshot }, getConfig()
+        { action: accion, tiempo_ejecutado: tiempoValido }, getConfig()
       );
       if (accion === 'stop') {
         localStorage.removeItem(`temp_time_${tareaId}`);
-        navigate('/gestor-estudio');
+        navigate('/gestor-estudio', { state: { isInternalNav: true } });
       } else {
         setTarea(res.data.tarea);
       }
     } catch (err) {
-      alert('Error al grabar.');
+      console.error('Error al gestionar tarea:', err.response?.data || err.message);
+      alert(`❌ Error al grabar: ${err.response?.data?.message || 'Error desconocido'}`);
+    }
+  };
+
+  // NUEVO: Función para guardar notas
+  const handleGuardarNota = async () => {
+    if (!nota.trim()) return; // No hacer nada si está vacío o solo espacios
+    
+    setSavingNote(true);
+    try {
+      await axios.post(
+        `${API_BASE_URL}/sesiones/tareas/${tareaId}/gestionar`, 
+        { action: 'note', notas: nota.substring(0, 10000) },
+        getConfig()
+      );
+      alert('✅ Nota guardada correctamente');
+    } catch (err) {
+      console.error("Error al guardar nota:", err);
+      alert(`❌ Error al guardar la nota: ${err.response?.data?.message || 'Error desconocido'}`);
+    } finally {
+      setSavingNote(false);
     }
   };
 
@@ -156,6 +189,40 @@ const TareaManager = () => {
               </strong>
             </div>
           </div>
+
+          {/* NUEVA: Tarjeta de Notas */}
+          <div className="tm-resumen-card mt-6">
+            <h3 className="tm-resumen-title">📝 Notas de la Tarea</h3>
+            <p className="text-sm text-gray-500 mb-2">Deja constancia de tus avances o dudas (Máx 10,000 caracteres)</p>
+            
+            <textarea
+              value={nota}
+              onChange={(e) => {
+                if (e.target.value.length <= 10000) setNota(e.target.value);
+              }}
+              placeholder="Escribe aquí tus observaciones, dudas o conclusiones..."
+              className="w-full h-48 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 resize-none text-sm bg-gray-50"
+            />
+
+            <div className="flex justify-between items-center mt-3">
+              <span className={`text-xs ${nota.length > 9000 ? 'text-red-500 font-bold' : 'text-gray-400'}`}>
+                {nota.length} / 10,000 caracteres
+              </span>
+
+              <button 
+                onClick={handleGuardarNota}
+                disabled={savingNote || nota.trim().length === 0}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  savingNote 
+                      ? 'bg-gray-300 cursor-not-allowed' 
+                      : 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed'
+                }`}
+              >
+                {savingNote ? 'Guardando...' : 'Guardar Nota'}
+              </button>
+            </div>
+          </div>
+
         </aside>
 
       </div>

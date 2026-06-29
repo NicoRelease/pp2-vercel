@@ -12,6 +12,13 @@ export default (sequelize) => {
         tiempo_real_ejecucion: { type: DataTypes.INTEGER, defaultValue: 0 },
         es_completada: { type: DataTypes.BOOLEAN, defaultValue: false },
         feedback_dominio: { type: DataTypes.STRING, defaultValue: 'Regular' },
+        notas: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            validate: {
+                len: [0, 10000]
+            }
+        },
         creado_en: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
         actualizado_en: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
     }, {
@@ -19,9 +26,9 @@ export default (sequelize) => {
         timestamps: false
     });
 
-    // Asociación con Sesion (muchos a uno)
+    // Asociación con Sesion (muchos a uno) - Alias: 'sesion' (singular)
     Tarea.associate = function(models) {
-        Tarea.belongsTo(models.Sesion, { foreignKey: 'sesion_id', as: 'sesiones' });
+        Tarea.belongsTo(models.Sesion, { foreignKey: 'sesion_id', as: 'sesion' });
     };
 
     return Tarea;

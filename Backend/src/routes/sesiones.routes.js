@@ -52,4 +52,7 @@ router.delete('/tareas/:id', protect, checkOwnership('Tarea'), sesionesControlle
 // 12. OBTENER una tarea específica por ID
 router.get('/tareas/:id', protect, sesionesController.obtenerTareaPorId);
 
+// 13. ACTUALIZAR notas de una tarea (Solo si es dueño o Admin)
+router.put('/tareas/:id/notas', protect, checkOwnership('Tarea'), sesionesController.actualizarNotasTarea);
+
 export default router;
