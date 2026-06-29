@@ -47,6 +47,10 @@ export default function Login() {
         const UserId = Number(cleanUserId);
         localStorage.setItem('UserId',UserId);
 
+        // ✅ SEGURIDAD: Marcar entrada válida y resetear navegación interna
+        sessionStorage.setItem('validEntry', 'true');
+        sessionStorage.removeItem('hasNavigatedInternally');
+
 
         const { rol_id, estado, group_id} = data.user;
         let groupResponse = null;
@@ -69,26 +73,26 @@ export default function Login() {
           
           // Primero verificamos si debe ir a grupo-resumen
           if (rol_id === 3 && groupResponse && groupResponse.usuarios && groupResponse.usuarios.length > 0) {
-            navigate("/grupo-resumen");
-            return; // Salimos de la función para evitar que continúe
+            navigate("/grupo-resumen", { replace: true, state: { isInternalNav: true } });
+            return; 
           }
         }
         
         // Lógica de navegación principal
         if (estado === false) {
-          navigate("/waiting-room");
+          navigate("/waiting-room", { replace: true, state: { isInternalNav: true } });
         } 
         else if (rol_id === 1) {
-          navigate("/admin-dashboard");
+          navigate("/admin-dashboard", { replace: true, state: { isInternalNav: true } });
         } 
         else if (rol_id === 2) {
-          navigate("/group-admin");
+          navigate("/group-admin", { replace: true, state: { isInternalNav: true } });
         } 
         else if (rol_id === 3 && (!groupResponse || !groupResponse.usuarios || groupResponse.usuarios.length === 0)) {
-          navigate("/gestor-estudio");
+          navigate("/gestor-estudio", { replace: true, state: { isInternalNav: true } });
         } 
         else {
-          navigate("/waiting-room");
+          navigate("/waiting-room", { replace: true, state: { isInternalNav: true } });
         }
       } else {
         setErrorMessage(data.error || "Credenciales incorrectas.");

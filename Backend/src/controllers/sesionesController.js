@@ -72,6 +72,32 @@ export const obtenerSesionPorId = async (req, res) => {
     }
 };
 
+export const actualizarSesion = async (req, res) => {
+    try {
+        // Solo permitimos actualizar campos específicos para seguridad
+        const allowedFields = ['nombre', 'fecha_examen', 'duracion_total_estimada', 'es_completada'];
+        
+        const dataToUpdate = {};
+        for (const key of Object.keys(req.body)) {
+            if (allowedFields.includes(key)) {
+                dataToUpdate[key] = req.body[key];
+            }
+        }
+
+        // Usamos el servicio para actualizar. El middleware checkOwnership ya verificó propiedad.
+        const updatedSesion = await SesionesService.actualizarSesion(req.params.id, dataToUpdate);
+        
+        res.status(200).json({ message: 'Sesión actualizada correctamente', sesion: updatedSesion });
+    } catch (error) {
+        console.error('[actualizarSesion] Error:', error.message);
+        // Si es un campo no válido o error de BD
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({ message: 'Error de validación', errors: error.errors });
+        }
+        res.status(500).json({ message: "Error al actualizar sesión", error: error.message });
+    }
+};
+
 export const eliminarSesionCompleta = async (req, res) => {
     try {
         await SesionesService.borrarSesionCompleta(req.params.id);

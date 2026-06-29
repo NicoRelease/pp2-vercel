@@ -15,6 +15,9 @@ import AdminDashboard from './components/AdminDashboard';
 import GroupAdminDashboard from './components/GroupAdminDashboard'; 
 import WaitingRoom from './components/WaitingRoom'; 
 
+// Importar protección de rutas
+import ProtectedRoute from './components/ProtectedRoute';
+
 import './App.css';
 import '../src/App.css';
 
@@ -24,21 +27,54 @@ function App() {
       <div className="app-container" >
         <main>
           <Routes>
+            {/* Rutas Públicas */}
             <Route path="/" element={<Home />} />
             <Route path="/Login" element={<Login />} />
             <Route path="/Register" element={<Register />} />
             
-            {/* Rutas de Administración y Onboarding */}
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="/group-admin" element={<GroupAdminDashboard />} />
-            <Route path="/waiting-room" element={<WaitingRoom />} />
+            {/* Rutas Protegidas de Administración y Onboarding */}
+            <Route path="/admin-dashboard" element={
+              <ProtectedRoute allowedRoles={[1]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/group-admin" element={
+              <ProtectedRoute allowedRoles={[2, 3]}>
+                <GroupAdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/waiting-room" element={
+              <ProtectedRoute>
+                <WaitingRoom />
+              </ProtectedRoute>
+            } />
 
-            {/* Rutas de la Aplicación */}
-            <Route path="/crear-sesion" element={<SessionForm />} />
-            <Route path="/grupo-resumen" element={<GroupResume />} />
-            <Route path="/gestor-estudio" element={<GestorEstudio />} />
-            <Route path="/tareas/:tareaId" element={<TareaManager />} />
-            <Route path="/session/:id" element={<SessionDetail />} />
+            {/* Rutas Protegidas de la Aplicación */}
+            <Route path="/crear-sesion" element={
+              <ProtectedRoute allowedRoles={[2, 3]}>
+                <SessionForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/grupo-resumen" element={
+              <ProtectedRoute allowedRoles={[3]}>
+                <GroupResume />
+              </ProtectedRoute>
+            } />
+            <Route path="/gestor-estudio" element={
+              <ProtectedRoute allowedRoles={[2, 3]}>
+                <GestorEstudio />
+              </ProtectedRoute>
+            } />
+            <Route path="/tareas/:tareaId" element={
+              <ProtectedRoute allowedRoles={[3]}>
+                <TareaManager />
+              </ProtectedRoute>
+            } />
+            <Route path="/session/:id" element={
+              <ProtectedRoute allowedRoles={[2, 3]}>
+                <SessionDetail />
+              </ProtectedRoute>
+            } />
           </Routes>
         </main>
       </div>

@@ -5,6 +5,7 @@ import HeaderNavegacion from './HeaderNavegacion';
 import SesionesList from './SesionesList';
 import TareasPorFecha from './TareasPorFecha';
 import HeaderNoLink from './HeaderNoLink';
+import EditSesion from './EditSesion'; // ← NUEVO: Importar componente de edición
 import '../App.css';
 
 const GestorEstudio = () => {
@@ -12,6 +13,7 @@ const GestorEstudio = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editingSession, setEditingSession] = useState(null); // ← NUEVO: Estado para sesión en edición
   const navigate = useNavigate();
   
   // Obtener token desde localStorage
@@ -88,7 +90,20 @@ const GestorEstudio = () => {
   };
 
   const handleSessionClick = (sesion) => {
-    navigate(`/sesiones/${sesion.id}`, { state: { sesion } });
+    navigate(`/session/${sesion.id}`, { state: { sesion } });
+  };
+
+  // ← NUEVO: Handler para abrir el formulario de edición
+  const handleEditSession = (sesion) => {
+    setEditingSession(sesion);
+    setVistaActual('edicion');
+  };
+
+  // ← NUEVO: Callback cuando se guarda la sesión exitosamente
+  const handleEditSaved = () => {
+    setEditingSession(null);
+    setVistaActual('sesiones');
+    fetchSesiones(); // Recargar datos actualizados desde el backend
   };
 
   const handleDeleteSession = async (sessionId) => {
@@ -215,11 +230,19 @@ const GestorEstudio = () => {
         />
         
         {/* Contenido según vista seleccionada */}
-        {vistaActual === 'sesiones' ? (
+        {editingSession ? (
+          // ← NUEVO: Renderizar formulario de edición cuando hay sesión seleccionada
+          <EditSesion 
+            sesion={editingSession} 
+            onSaved={handleEditSaved} 
+            onCancel={() => { setEditingSession(null); setVistaActual('sesiones'); }}
+          />
+        ) : vistaActual === 'sesiones' ? (
           <SesionesList
             userId={UserId} 
             sesiones={data}
             onSessionClick={handleSessionClick}
+            onEditSession={handleEditSession} // ← NUEVO: Pasar handler de edición al hijo
             onTareaClick={handleTareaClick}
             onDeleteSession={handleDeleteSession}
             onDeleteTarea={handleDeleteTarea}

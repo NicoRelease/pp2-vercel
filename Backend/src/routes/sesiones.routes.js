@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, authorizeRoles, checkOwnership } from '../middleware/authMiddleware.js';
 import * as sesionesController from '../controllers/sesionesController.js';
 
 const router = express.Router();
@@ -11,8 +11,8 @@ const router = express.Router();
 // 1. OBTENER todas las sesiones del usuario ACTUAL
 router.get('/user/:UserId', protect, sesionesController.obtenerTodasLasSesionesUsuario);
 
-// 2. OBTENER todas las sesiones (admin o testing)
-router.get('/', protect, sesionesController.obtenerTodasLasSesiones);
+// 2. OBTENER todas las sesiones (SOLO ADMIN - Rol 1)
+router.get('/', protect, authorizeRoles(1), sesionesController.obtenerTodasLasSesiones);
 
 // 3. CREAR una nueva sesión con sus tareas
 router.post('/', protect, sesionesController.crearSesion);
@@ -20,8 +20,11 @@ router.post('/', protect, sesionesController.crearSesion);
 // 4. OBTENER una sesión específica por ID
 router.get('/:id', protect, sesionesController.obtenerSesionPorId);
 
-// 5. ELIMINAR una sesión completa
-router.delete('/:id', protect, sesionesController.eliminarSesionCompleta);
+// 5. ELIMINAR una sesión completa (Solo si es dueño o Admin)
+router.delete('/:id', protect, checkOwnership('Sesion'), sesionesController.eliminarSesionCompleta);
+
+// 6. ACTUALIZAR una sesión existente (PATCH/PUT - Solo si es dueño o Admin)
+router.put('/:id', protect, checkOwnership('Sesion'), sesionesController.actualizarSesion);
 
 // 6. OBTENER la sesión activa
 router.get('/sesion-activa/actual', protect, sesionesController.obtenerSesionActiva);
@@ -40,11 +43,11 @@ router.get('/grupo/:group_id', protect, sesionesController.obtenerSesionesPorGru
 // RUTAS PARA TAREAS (CONTENIDO DE LAS SESIONES)
 // =======================================================
 
-// 10. GESTIONAR una tarea específica
-router.post('/tareas/:id/gestionar', protect, sesionesController.gestionarTarea);
+// 10. GESTIONAR una tarea específica (Valida propiedad del recurso)
+router.post('/tareas/:id/gestionar', protect, checkOwnership('Tarea'), sesionesController.gestionarTarea);
 
-// 11. ELIMINAR una tarea específica
-router.delete('/tareas/:id', protect, sesionesController.eliminarTarea);
+// 11. ELIMINAR una tarea específica (Valida propiedad del recurso)
+router.delete('/tareas/:id', protect, checkOwnership('Tarea'), sesionesController.eliminarTarea);
 
 // 12. OBTENER una tarea específica por ID
 router.get('/tareas/:id', protect, sesionesController.obtenerTareaPorId);

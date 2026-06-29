@@ -1,51 +1,80 @@
-// middleware/authMiddleware.js
-
 import jwt from 'jsonwebtoken';
-
-
-
+import db from '../models/index.js'; // Importamos DB para validaciones de propiedad
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-
-
+// 1. PROTECCIÓN BÁSICA (Verifica Token y extrae Rol/Grupo)
 export const protect = async (req, res, next) => {
-    // 1. Obtener el token del encabezado (Header)
- 
-    let token;
-    
-    // El token típicamente viene como: "Bearer TOKEN_AQUI"
-    const authHeader = req.headers.authorization;
+    let token;
+    const authHeader = req.headers.authorization;
     
-    if (authHeader && authHeader.startsWith('Bearer')) {
-        // Extraemos solo el token (quitando "Bearer ")
-        token = authHeader.split(' ')[1];
-        
-        try {
-            // 2. Verificar el token
-            // Si la verificación falla, salta al bloque catch
-            const decoded = jwt.verify(token, JWT_SECRET);
-            
-            // 3. Adjuntar la información del usuario a la solicitud
-            // El token solo contiene el 'id' del usuario, así que solo adjuntamos eso.
-            req.user = { id: decoded.id }; 
-            
-            // 4. Continuar con la siguiente función (el controlador de la ruta)
-            next();
-            return; // Salir de la función después de llamar a next()
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            
+            // Adjuntamos toda la info necesaria del usuario al request
+            req.user = {
+                id: decoded.id,
+                rol_id: decoded.rol_id,
+                group_id: decoded.group_id
+            };
+            next();
+        } catch (error) {
+            return res.status(401).json({ 
+                message: 'No autorizado, token fallido o expirado.', 
+                error: error.name 
+            });
+        }
+    }
 
-        } catch (error) {
-            console.error('Error de verificación JWT:', error.message);
-            // 401 Unauthorized
-            return res.status(401).json({ 
-                message: 'No autorizado, token fallido o expirado.',
-                error: error.name
-            });
-        }
-    }
+    if (!token) {
+        return res.status(401).json({ message: 'No autorizado, no se proporcionó token.' });
+    }
+};
 
-    // Si el token no se pudo extraer del header (o no existía)
-    if (!token) {
-        return res.status(401).json({ message: 'No autorizado, no se proporcionó token.' });
-    }
+// 2. NUEVO: Autorización por Roles (RBAC)
+export const authorizeRoles = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user || !allowedRoles.includes(req.user.rol_id)) {
+            const rolesMap = { 1: 'SysAdmin', 2: 'GroupAdmin', 3: 'Miembro' };
+            return res.status(403).json({ 
+                error: `Acceso denegado. Se requiere rol de: ${allowedRoles.map(r => rolesMap[r] || r).join(' o ')}` 
+            });
+        }
+        next();
+    };
+};
+
+// 3. NUEVO: Verificación de Propiedad del Recurso (Ownership)
+export const checkOwnership = (modelName, ownerField = 'user_id') => {
+    return async (req, res, next) => {
+        try {
+            // SysAdmin (rol 1) tiene acceso total a cualquier recurso
+            if (req.user.rol_id === 1) return next();
+
+            const Model = db[modelName];
+            if (!Model) throw new Error(`Modelo ${modelName} no encontrado`);
+
+            const resource = await Model.findByPk(req.params.id, { 
+                attributes: [ownerField]
+            });
+
+            if (!resource) return res.status(404).json({ error: 'Recurso no encontrado' });
+
+            // Validamos que el ID del usuario logueado coincida con el dueño del recurso
+            if (String(resource[ownerField]) !== String(req.user.id)) {
+                return res.status(403).json({ 
+                    error: `No tienes permiso para modificar este recurso. El propietario es otro usuario.` 
+                });
+            }
+            
+            // Adjuntamos el recurso completo al request para evitar reconsultas en el controlador
+            req.resource = await Model.findByPk(req.params.id);
+            next();
+        } catch (error) {
+            console.error(`[checkOwnership] Error:`, error.message);
+            res.status(500).json({ error: 'Error interno validando propiedad' });
+        }
+    };
 };

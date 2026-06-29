@@ -229,3 +229,76 @@ export const buscarTareaDiaService = async (userId) => {
 
     return { tieneSesiones: true, message, tarea, sesion: sesionActiva };
 };
+export const actualizarSesion = async (sesionId, datos) => {
+    const t = await sequelize.transaction();
+    try {
+        const sesion = await Sesion.findByPk(sesionId, { transaction: t });
+        if (!sesion) throw new Error("Sesión no encontrada");
+
+        // Actualizar campos básicos de la sesión
+        await sesion.update(datos, { transaction: t });
+
+        let tareasRegeneradas = 0;
+        
+        // Si cambiaron la fecha o la duración total, recalculamos y regeneramos las tareas
+        if (datos.fecha_examen || datos.duracion_total_estimada) {
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            const fechaExamenDate = new Date(datos.fecha_examen || sesion.fecha_examen);
+            
+            // Validación estricta: fecha no puede ser menor a la actual
+            if (fechaExamenDate < hoy) {
+                await t.rollback();
+                throw new Error("La fecha de examen no puede ser anterior al día de hoy.");
+            }
+
+            // Calcular días disponibles desde hoy hasta el nuevo examen
+            const diffTime = fechaExamenDate - hoy;
+            let diasDisponibles = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diasDisponibles < 1) diasDisponibles = 1;
+
+            const duracionTotal = datos.duracion_total_estimada || sesion.duracion_total_estimada;
+            // Calcular nueva duración diaria para distribuir el tiempo total equitativamente
+            const duracionDiaria = Math.round(duracionTotal / diasDisponibles);
+
+            // Eliminar tareas incompletas anteriores para regenerar el plan de estudio
+            await Tarea.destroy({ 
+                where: { sesion_id: sesionId, es_completada: false }, 
+                transaction: t 
+            });
+
+            let tiempoRestante = duracionTotal;
+            const nuevasTareas = [];
+            let fechaActual = new Date(hoy);
+
+            for (let i = 0; i < diasDisponibles; i++) {
+                if (tiempoRestante <= 0) break;
+                const duracionProgramada = Math.min(duracionDiaria, tiempoRestante);
+                
+                nuevasTareas.push({
+                    sesion_id: sesionId,
+                    nombre: `Tarea Día ${i + 1} de ${sesion.nombre}`,
+                    fecha_programada: new Date(fechaActual).toISOString().split('T')[0],
+                    duracion_estimada: duracionProgramada,
+                    es_completada: false,
+                });
+                tiempoRestante -= duracionProgramada;
+                fechaActual = new Date(fechaActual.getTime() + 24 * 60 * 60 * 1000);
+            }
+
+            if (nuevasTareas.length > 0) {
+                await Tarea.bulkCreate(nuevasTareas, { transaction: t });
+                tareasRegeneradas = nuevasTareas.length;
+            }
+        }
+
+        await t.commit();
+
+        return await Sesion.findByPk(sesionId, { 
+            include: [{ model: Tarea, as: 'tareas' }] 
+        });
+    } catch (error) {
+        if (t && !t.finished) await t.rollback();
+        throw error;
+    }
+};
