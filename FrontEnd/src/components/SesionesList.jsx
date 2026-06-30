@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 
 // Componente Interno para los cuadros de estadísticas
 const StatBox = ({ emoji, label, value, color = '#333' }) => (
@@ -11,6 +12,8 @@ const StatBox = ({ emoji, label, value, color = '#333' }) => (
 
 const SesionesList = ({ sesiones, onDeleteSession, onEditSession, onSelectSession, onTareaClick, userId }) => {
   
+  const location = useLocation();
+  const isGroupSummary = location.pathname === '/grupo-resumen';
   const hoy = new Date();
   const hoy1 = hoy.toISOString().split('T')[0];
 
@@ -69,16 +72,18 @@ const SesionesList = ({ sesiones, onDeleteSession, onEditSession, onSelectSessio
                     </div>
 
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                      <div style={styles.buttonGroup}>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); onEditSession?.(sesion); }}
-                          style={styles.btnAction}
-                        >✏️</button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); onDeleteSession(sesion.id, sesion.nombre); }}
-                          style={{ ...styles.btnAction, color: '#dc3545' }}
-                        >🗑️</button>
-                      </div>
+                      {!isGroupSummary && (
+                        <div style={styles.buttonGroup}>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); onEditSession?.(sesion); }}
+                            style={styles.btnAction}
+                          >✏️</button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); onDeleteSession(sesion.id, sesion.nombre); }}
+                            style={{ ...styles.btnAction, color: '#dc3545' }}
+                          >🗑️</button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

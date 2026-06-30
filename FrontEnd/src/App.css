@@ -1,3 +1,69 @@
+/* --- Estilos para el Resumen Alineado (TareaManager) --- */
+
+
+.tm-resumen-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+}
+
+.tm-resumen-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tm-divider {
+    height: 1px;
+    background-color: #e5e7eb;
+    margin-bottom: 1rem;
+}
+
+.tm-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.tm-info-row:last-child {
+    border-bottom: none;
+}
+
+.tm-info-row span {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.tm-info-row strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.text-active {
+    color: #10b981 !important;
+}
+
+.text-paused {
+    color: #f59e0b !important;
+}
+
+.text-red-500 {
+    color: #ef4444 !important;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+/* --- Fin Estilos Resumen Alineado --- */
 /* ==========================================================================
    1. RESET & BASE (Limpieza de duplicados y conflictos)
    ========================================================================== */
@@ -254,23 +320,7 @@ form {
   margin: 0 auto;
 }
 
-.Contador {
-    flex: 1 1 600px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: inherit;
-  }
-
-.Resumen {
-    flex: 1 1 300px;
-  }
-
-.Espacio {
-height: 70px;
-}
-
-.tm-btn-back {
+.tm-btn-back{
   background: none;
   border: none;
   color: #007bff;
@@ -279,8 +329,12 @@ height: 70px;
   margin-bottom: 19px;
   display: block;
 }
+.espacio{
+margin-bottom: auto;
+  
+}
 
-.tm-card {
+.tm-card, .tm-resumen-card, .tm-notas-card {
   background-color: white;
   padding: 30px;
   border-radius: 15px;
@@ -341,14 +395,7 @@ height: 70px;
 }
 
 /* Tarjeta de Resumen (Derecha) */
-.tm-resumen-card {
-  background-color: white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  position: sticky;
-  top: 20px;
-}
+
 
 .tm-resumen-title { font-size: 18px; margin: 0 0 10px 0; font-weight: bold; }
 .tm-divider { height: 3px; background-color: #007bff; width: 40px; margin-bottom: 15px; }
@@ -990,4 +1037,99 @@ height: 70px;
 
 .waiting-room-button:hover {
   background-color: #2563eb; /* hover:bg-blue-700 */
+}
+/* --- Estilos para TareaManager --- */
+/* ==========================================================================
+   LAYOUT TAREAMANAGER (2 Columnas + Footer Completo)
+   ========================================================================== */
+
+.Tarjetas {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos bajen si no caben */
+    gap: 20px;       /* Espacio entre columnas y filas */
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Columnas Izquierda (Tarea) y Derecha (Resumen): Ocupan espacio igual */
+.Tarea, .Resumen {
+    flex: 1; /* Crecen para llenar el espacio disponible equitativamente */
+    min-width: 320px; /* Ancho mínimo antes de apilarse en móviles */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Forzar que la tarjeta de notas ocupe todo el ancho y baje a nueva línea */
+.tm-notas-card {
+    flex-basis: 100%; /* Ocupa el 100% del contenedor padre */
+    width: 100%;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Estilo del Textarea para que llene el ancho */
+.tm-textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
+    font-family: inherit;
+    resize: vertical; /* Permitir redimensionar solo verticalmente */
+}
+
+.tm-textarea:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Footer de las notas (contador + botón) */
+.tm-note-footer {
+    display: flex;
+    justify-content: space-between; /* Separa contador y botón a los extremos */
+    align-items: center;
+    margin-top: 10px;
+}
+
+.tm-char-count {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+/* Botón Guardar Nota (Texto Negro) */
+.tm-btn-guardar-nota {
+    background-color: #e2e8f0;
+    color: black !important; /* Texto negro forzado */
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tm-btn-guardar-nota:hover:not(:disabled) {
+    background-color: #cbd5e1;
+}
+
+.tm-btn-guardar-nota:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Ajustes Responsive para Móviles */
+@media (max-width: 768px) {
+    .Tarjetas {
+        flex-direction: column; /* En pantallas pequeñas, todo se apila verticalmente */
+    }
+    
+    .Tarea, .Resumen, .tm-notas-card {
+        width: 100%;
+        flex-basis: auto;
+    }
 }

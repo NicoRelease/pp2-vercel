@@ -7,13 +7,13 @@ import {
     deleteUser
 } from '../services/user.service.js';
 import { getAllMyGroups } from '../services/group.service.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, authorizeRoles } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 // Rutas protegidas para administración
-// En admin.routes.js
-router.get('/users', protect, async (req, res) => {
+// En admin.routes.js - Solo SysAdmin (rol_id = 1)
+router.get('/users', protect, authorizeRoles(1), async (req, res) => {
     try {
        
         const users = await getAllUsers();
@@ -26,7 +26,7 @@ router.get('/users', protect, async (req, res) => {
 });
 
 
-router.get('/groups', protect, async (req, res) => {
+router.get('/groups', protect, authorizeRoles(1), async (req, res) => {
     try {
         // Necesitamos el admin_id del usuario autenticado
         const admin_id = req.user.id;
@@ -37,10 +37,18 @@ router.get('/groups', protect, async (req, res) => {
     }
 });
 
-router.put('/users/:id', protect, async (req, res) => {
+router.put('/users/:id', protect, authorizeRoles(1), async (req, res) => {
     try {
         const { id } = req.params;
-        const userData = req.body;
+        // Filtrado de campos permitidos para evitar asignación masiva insegura
+        const allowedFields = ['username', 'email', 'estado'];
+        const userData = {};
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                userData[field] = req.body[field];
+            }
+        }
+        
         const user = await updateUser(id, userData);
         res.status(200).json(user);
     } catch (error) {
@@ -48,7 +56,7 @@ router.put('/users/:id', protect, async (req, res) => {
     }
 });
 
-router.delete('/users/:id', protect, async (req, res) => {
+router.delete('/users/:id', protect, authorizeRoles(1), async (req, res) => {
     try {
         const { id } = req.params;
         const result = await deleteUser(id);

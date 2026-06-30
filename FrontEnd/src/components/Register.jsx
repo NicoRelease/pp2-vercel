@@ -67,17 +67,20 @@ export default function Register() {
             const cleanUserId = userid ? userid.trim().replace(/"/g, '') : null;
             const UserId = Number(cleanUserId);
             localStorage.setItem('UserId',UserId);
+
+            // ✅ SEGURIDAD: Marcar entrada válida para navegación interna posterior
+            sessionStorage.setItem('validEntry', 'true');
             alert('¡Registro exitoso!');
             
-            // Redirección por Rol
+            // Redirección por Rol con estado de navegación interna
             if (data.user.rol_id === 1) {
-                navigate('/admin-dashboard');
+                navigate('/admin-dashboard', { replace: true, state: { isInternalNav: true } });
             } else if (data.user.rol_id === 2) {
-                navigate('/group-admin');
+                navigate('/group-admin', { replace: true, state: { isInternalNav: true } });
             } else if (data.user.estado === false) {
-                navigate('/waiting-room');
+                navigate('/waiting-room', { replace: true, state: { isInternalNav: true } });
             } else {
-                navigate('/gestor-estudio');
+                navigate('/gestor-estudio', { replace: true, state: { isInternalNav: true } });
             }
         } catch (err) {
             console.error('Error en el registro:', err);

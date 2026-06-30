@@ -14,6 +14,10 @@ const TareaManager = () => {
   const [estaActiva, setEstaActiva] = useState(false);
   const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
 
+  // Estados para las notas
+  const [nota, setNota] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const autosaveIntervalRef = useRef(null);
 
@@ -34,6 +38,10 @@ const TareaManager = () => {
       setSesion(res.data.sesion);
       setTiempoTranscurrido(tiempoFinal);
       localStorage.setItem(`temp_time_${tareaId}`, tiempoFinal);
+
+      if (res.data.notas) {
+        setNota(res.data.notas);
+      }
     } catch (err) {
       console.error("Error de sincronización:", err);
     }
@@ -81,17 +89,39 @@ const TareaManager = () => {
     const tiempoSnapshot = tiempoTranscurrido;
     setEstaActiva(false);
     try {
+      const tiempoValido = (typeof tiempoSnapshot === 'number' && !isNaN(tiempoSnapshot)) ? tiempoSnapshot : 0;
+      
       const res = await axios.post(`${API_BASE_URL}/sesiones/tareas/${tareaId}/gestionar`, 
-        { action: accion, tiempo_ejecutado: tiempoSnapshot }, getConfig()
+        { action: accion, tiempo_ejecutado: tiempoValido }, getConfig()
       );
       if (accion === 'stop') {
         localStorage.removeItem(`temp_time_${tareaId}`);
-        navigate('/gestor-estudio');
+        navigate('/gestor-estudio', { state: { isInternalNav: true } });
       } else {
         setTarea(res.data.tarea);
       }
     } catch (err) {
-      alert('Error al grabar.');
+      console.error('Error al gestionar tarea:', err.response?.data || err.message);
+      alert(`❌ Error al grabar: ${err.response?.data?.message || 'Error desconocido'}`);
+    }
+  };
+
+  const handleGuardarNota = async () => {
+    if (!nota.trim()) return;
+    
+    setSavingNote(true);
+    try {
+      await axios.post(
+        `${API_BASE_URL}/sesiones/tareas/${tareaId}/gestionar`, 
+        { action: 'note', notas: nota.substring(0, 10000) },
+        getConfig()
+      );
+      alert('✅ Nota guardada correctamente');
+    } catch (err) {
+      console.error("Error al guardar nota:", err);
+      alert(`❌ Error al guardar la nota: ${err.response?.data?.message || 'Error desconocido'}`);
+    } finally {
+      setSavingNote(false);
     }
   };
 
@@ -107,10 +137,12 @@ const TareaManager = () => {
   return (
     <div className="Tarjeta-Principal tm-page">
       <HeaderNoLink />
-      <div className="Tarea">
+      
+      {/* Contenedor Principal: Grid/Flex */}
+      <div className="Tarjetas">
         
-        {/* COLUMNA IZQUIERDA: GESTIÓN */}
-        <div className="Contador">
+        {/* COLUMNA IZQUIERDA: GESTIÓN Y TIMER */}
+        <div className="Tarea">
           <button onClick={() => navigate('/gestor-estudio')} className="tm-btn-back">↩️ Volver</button>
           
           <div className="tm-card">
@@ -135,9 +167,8 @@ const TareaManager = () => {
         </div>
 
         {/* COLUMNA DERECHA: RESUMEN */}
-        
-        <aside className="Resumen">
-          <div className="Espacio"></div>
+        <div className="Resumen">
+          <div className="espacio"> </div>
           <div className="tm-resumen-card">
             <h3 className="tm-resumen-title">📊 Resumen General</h3>
             <div className="tm-divider" />
@@ -156,7 +187,36 @@ const TareaManager = () => {
               </strong>
             </div>
           </div>
-        </aside>
+        </div>
+
+        {/* TARJETA DE NOTAS: ANCHO COMPLETO (Debajo de todo) */}
+        <div className="tm-notas-card">
+            <h3 className="tm-resumen-title">📝 Notas de la Tarea</h3>
+            <p className="tm-note-description">Deja constancia de tus avances o dudas (Máx 10,000 caracteres)</p>
+            
+            <textarea
+              value={nota}
+              onChange={(e) => {
+                if (e.target.value.length <= 10000) setNota(e.target.value);
+              }}
+              placeholder="Escribe aquí tus observaciones, dudas o conclusiones..."
+              className="tm-textarea"
+            />
+
+            <div className="tm-note-footer">
+              <span className={`tm-char-count ${nota.length > 9000 ? 'text-red-500 font-bold' : ''}`}>
+                {nota.length} / 10,000 caracteres
+              </span>
+
+              <button 
+                onClick={handleGuardarNota}
+                disabled={savingNote || nota.trim().length === 0}
+                className="tm-btn-guardar-nota"
+              >
+                {savingNote ? 'Guardando...' : 'Guardar Nota'}
+              </button>
+            </div>
+        </div>
 
       </div>
     </div>
