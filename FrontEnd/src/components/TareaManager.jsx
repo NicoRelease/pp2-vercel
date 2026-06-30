@@ -14,7 +14,7 @@ const TareaManager = () => {
   const [estaActiva, setEstaActiva] = useState(false);
   const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
 
-  // NUEVO: Estados para las notas
+  // Estados para las notas
   const [nota, setNota] = useState('');
   const [savingNote, setSavingNote] = useState(false);
 
@@ -39,7 +39,6 @@ const TareaManager = () => {
       setTiempoTranscurrido(tiempoFinal);
       localStorage.setItem(`temp_time_${tareaId}`, tiempoFinal);
 
-      // Cargar nota existente si la hay
       if (res.data.notas) {
         setNota(res.data.notas);
       }
@@ -90,7 +89,6 @@ const TareaManager = () => {
     const tiempoSnapshot = tiempoTranscurrido;
     setEstaActiva(false);
     try {
-      // Validar que tiempo_ejecutado sea un número válido para evitar error 500
       const tiempoValido = (typeof tiempoSnapshot === 'number' && !isNaN(tiempoSnapshot)) ? tiempoSnapshot : 0;
       
       const res = await axios.post(`${API_BASE_URL}/sesiones/tareas/${tareaId}/gestionar`, 
@@ -108,9 +106,8 @@ const TareaManager = () => {
     }
   };
 
-  // NUEVO: Función para guardar notas
   const handleGuardarNota = async () => {
-    if (!nota.trim()) return; // No hacer nada si está vacío o solo espacios
+    if (!nota.trim()) return;
     
     setSavingNote(true);
     try {
@@ -140,10 +137,12 @@ const TareaManager = () => {
   return (
     <div className="Tarjeta-Principal tm-page">
       <HeaderNoLink />
-      <div className="Tarea">
+      
+      {/* Contenedor Principal: Grid/Flex */}
+      <div className="Tarjetas">
         
-        {/* COLUMNA IZQUIERDA: GESTIÓN */}
-        <div className="Contador">
+        {/* COLUMNA IZQUIERDA: GESTIÓN Y TIMER */}
+        <div className="Tarea">
           <button onClick={() => navigate('/gestor-estudio')} className="tm-btn-back">↩️ Volver</button>
           
           <div className="tm-card">
@@ -168,9 +167,8 @@ const TareaManager = () => {
         </div>
 
         {/* COLUMNA DERECHA: RESUMEN */}
-        
-        <aside className="Resumen">
-          <div className="Espacio"></div>
+        <div className="Resumen">
+          <div className="espacio"> </div>
           <div className="tm-resumen-card">
             <h3 className="tm-resumen-title">📊 Resumen General</h3>
             <div className="tm-divider" />
@@ -189,11 +187,12 @@ const TareaManager = () => {
               </strong>
             </div>
           </div>
+        </div>
 
-          {/* NUEVA: Tarjeta de Notas */}
-          <div className="tm-resumen-card mt-6">
+        {/* TARJETA DE NOTAS: ANCHO COMPLETO (Debajo de todo) */}
+        <div className="tm-notas-card">
             <h3 className="tm-resumen-title">📝 Notas de la Tarea</h3>
-            <p className="text-sm text-gray-500 mb-2">Deja constancia de tus avances o dudas (Máx 10,000 caracteres)</p>
+            <p className="tm-note-description">Deja constancia de tus avances o dudas (Máx 10,000 caracteres)</p>
             
             <textarea
               value={nota}
@@ -201,29 +200,23 @@ const TareaManager = () => {
                 if (e.target.value.length <= 10000) setNota(e.target.value);
               }}
               placeholder="Escribe aquí tus observaciones, dudas o conclusiones..."
-              className="w-full h-48 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 resize-none text-sm bg-gray-50"
+              className="tm-textarea"
             />
 
-            <div className="flex justify-between items-center mt-3">
-              <span className={`text-xs ${nota.length > 9000 ? 'text-red-500 font-bold' : 'text-gray-400'}`}>
+            <div className="tm-note-footer">
+              <span className={`tm-char-count ${nota.length > 9000 ? 'text-red-500 font-bold' : ''}`}>
                 {nota.length} / 10,000 caracteres
               </span>
 
               <button 
                 onClick={handleGuardarNota}
                 disabled={savingNote || nota.trim().length === 0}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  savingNote 
-                      ? 'bg-gray-300 cursor-not-allowed' 
-                      : 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed'
-                }`}
+                className="tm-btn-guardar-nota"
               >
                 {savingNote ? 'Guardando...' : 'Guardar Nota'}
               </button>
             </div>
-          </div>
-
-        </aside>
+        </div>
 
       </div>
     </div>
