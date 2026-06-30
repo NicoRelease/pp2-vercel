@@ -31,18 +31,18 @@ const AdminDashboard = () => {
             if (!usersRes.ok) {
                 throw new Error(`Failed to fetch users: ${usersRes.status}`);
             }
-            console.log("datos recibidos en bruto del back: ",groupsRes)
+            
             if (!groupsRes.ok) {
                 throw new Error(`Failed to fetch groups: ${groupsRes.status}`);
             }
             
             const usersData = await usersRes.json();
             const groupsData = await groupsRes.json();
-            console.log("datos en json del back: ",groupsData)
+            
             setUsers(usersData);
             setGroups(groupsData);
             setLoading(false);
-            console.log("Info Seteada",groups)
+            
         } catch (error) {
             console.error("Error cargando datos:", error);
             alert("Error al cargar los datos. Por favor, inténtelo de nuevo.");
