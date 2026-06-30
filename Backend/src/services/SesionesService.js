@@ -1,7 +1,7 @@
 import db from '../models/index.js';
-
+import { Sequelize } from 'sequelize'; 
 const sequelize = db.sequelize;
-const Op = db.Sequelize.Op;
+const Op = Sequelize.Op;
 const Sesion = db.Sesion;
 const Tarea = db.Tarea;
 
