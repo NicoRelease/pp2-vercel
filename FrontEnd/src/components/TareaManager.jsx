@@ -43,7 +43,8 @@ const TareaManager = () => {
         setNota(res.data.notas);
       }
     } catch (err) {
-      console.error("Error de sincronización:", err);
+      alert("No tienes permiso para acceder a esa tarea")
+           console.error("Error de sincronización:", err);
     }
   }, [tareaId, API_BASE_URL, getConfig]);
 
