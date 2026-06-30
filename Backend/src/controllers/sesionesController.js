@@ -154,15 +154,52 @@ export const eliminarTarea = async (req, res) => {
     }
 };
 
-export const obtenerTareaPorId = async (req, res) => {
-    try {
-        const tarea = await SesionesService.buscarTareaId(req.params.id);
-        if (!tarea) return res.status(404).json({ message: "Tarea no encontrada" });
-        res.status(200).json(tarea);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener tarea", error: error.message });
-    }
+export const obtenerTareaPorId = async (req, res) => { 
+    try { 
+        
+        // 1. Recuperamos la tarea desde base de datos por ID  
+         const tarea = await SesionesService.buscarTareaId(req.params.id); 
+
+       if(!tarea){
+            return res.status(404).json({ message: "La Tarea solicitada no existe." }); 
+       }
+
+        let propietarioId  = null; 
+       
+     // Buscamos al dueño. Si tu servicio te trae incluida la 'sesión' dentro del JSON de tarea...  
+      if(tarea.sesion.user_id) {
+          propietarioId = tarea.sesion.user_id ; /* Ajustar nombre según el campo user_id o userId exacto en DB */ 
+     } else {
+        console.log ("No existe Usuario Dueño de la tarea")
+     } 
+
+
+
+
+        if(propietarioId && req.user.rol_id != 1) { 
+
+          // Comparamos string vs integer si tu DB guarda numérico y JWT envía texto (parseInt):
+            const usuarioToken = parseInt(req.user.id); 
+            
+           if( propietarioId !==  usuarioToken){ 
+            
+                  console.error(`El Usuario ${req.user} no tiene permiso para ver la tarea ID: ${tarea.id}`) ;   
+                    return res.status(403).json({ message:"Acceso denegado: No eres el propietario de este recurso."});  
+            } 
+
+       }
+
+         // Si pasa los filtros, devolvemos respuesta única correcta 200 Ok
+        return   res .status(200) . json(tarea);  
+
+    } catch (error){ 
+      console.error(error.message);   
+          return     res. status(500).json({ message: "Error interno al obtener tarea.", detail : error.message}) ;  
+       };  
+    
 };
+
+
 
 export const obtenerTareaDelDia = async (req, res) => {
     try {
